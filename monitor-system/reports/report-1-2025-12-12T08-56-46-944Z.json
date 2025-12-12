@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-12-12T08:56:40.265Z",
+  "tests": [
+    {
+      "name": "Website Availability",
+      "category": "availability",
+      "critical": true,
+      "status": "PASS",
+      "details": "✅ Website is accessible\nStatus: 200 OK\nTitle: \"Login to Grivas Interactive Platform\"\nRequests: 17 (1 failed)\nContent length: 179 characters",
+      "duration": 6036,
+      "error": null,
+      "metrics": {
+        "requests": 17,
+        "failedRequests": 1,
+        "jsHeapUsedSize": 2209396,
+        "jsHeapTotalSize": 4104192
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "successRate": 100
+  },
+  "triggeredBy": "scheduled",
+  "duration": 6037,
+  "runId": 1,
+  "config": {
+    "website": "https://grivaseltinteractive.gr",
+    "timestamp": "2025-12-12T08:56:46.944Z"
+  }
+}

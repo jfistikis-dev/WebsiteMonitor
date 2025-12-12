@@ -1,0 +1,31 @@
+{
+  "name": "website-monitor",
+  "version": "2.0.0",
+  "description": "Website Monitoring System with Dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dashboard": "node dashboard/server.js",
+    "monitor": "node index.js scheduled",
+    "test": "echo \"Run monitor.bat for testing\" && exit 0",
+    "install-deps": "npm install"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0",
+    "nodemailer": "^6.9.7",
+    "sqlite3": "^5.1.6",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "monitoring",
+    "website",
+    "dashboard",
+    "healthcheck",
+    "automation"
+  ],
+  "author": "Your Company IT",
+  "license": "MIT"
+}

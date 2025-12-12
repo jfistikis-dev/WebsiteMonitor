@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Monitoring Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <h1>Website Monitor</h1>
+                <span class="status-badge" id="system-status">Loading...</span>
+            </div>
+            <div class="last-update" id="last-update">
+                <i class="fas fa-sync"></i> Updated: Loading...
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Current Uptime</h3>
+                    <div class="stat-value" id="current-uptime">--%</div>
+                    <div class="stat-trend" id="uptime-trend"></div>
+                </div>
+            </div>
+
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Open Incidents</h3>
+                    <div class="stat-value" id="open-incidents">0</div>
+                    <div class="stat-subtitle" id="incident-details">No critical issues</div>
+                </div>
+            </div>
+
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Today's Runs</h3>
+                    <div class="stat-value" id="today-runs">0</div>
+                    <div class="stat-subtitle" id="last-run-time">Never</div>
+                </div>
+            </div>
+
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Weekly Average</h3>
+                    <div class="stat-value" id="weekly-average">--%</div>
+                    <div class="stat-subtitle">Success Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Uptime Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-area"></i> Uptime History (30 Days)</h2>
+                        <select id="uptime-period">
+                            <option value="7">7 Days</option>
+                            <option value="30" selected>30 Days</option>
+                            <option value="90">90 Days</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="uptimeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Test Runs -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-list"></i> Recent Test Runs</h2>
+                        <button class="btn-refresh" onclick="loadRecentRuns()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="recent-runs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Tests</th>
+                                        <th>Passed</th>
+                                        <th>Failed</th>
+                                        <th>Success</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- System Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-info-circle"></i> System Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Monitoring URL:</span>
+                                <span class="info-value" id="monitored-url">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Database Size:</span>
+                                <span class="info-value" id="db-size">Loading...</span>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Total Records:</span>
+                                <span class="info-value" id="total-records">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Total Test Runs:</span>
+                                <span class="info-value" id="total-runs">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Dashboard Uptime:</span>
+                                <span class="info-value" id="dashboard-uptime">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="actions-grid">
+                            <button class="action-btn warning" onclick="runEnhancedManualTest()">
+                                <i class="fas fa-chart-line"></i> Run with Progress
+                            </button>
+                            <button class="action-btn success" onclick="exportData()">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                            <button class="action-btn info" onclick="refreshAll()">
+                                <i class="fas fa-sync"></i> Refresh All
+                            </button>
+                            <button class="action-btn warning" onclick="viewLogs()">
+                                <i class="fas fa-file-alt"></i> View Logs
+                            </button>
+                        
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Open Incidents -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-exclamation-circle"></i> Active Incidents</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="incidents-list">
+                            <div class="empty-state">
+                                <i class="fas fa-check-circle success"></i>
+                                <p>No active incidents</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Website Monitoring System v1.0 | Data updates every 30 seconds</p>
+            <p class="footer-links">
+                <a href="#" onclick="showAbout()">About</a> |
+                <a href="#" onclick="showSettings()">Settings</a> |
+                <a href="#" onclick="showHelp()">Help</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal for Run Details -->
+    <div id="run-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Test Run Details</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="run-details-content">
+                <!-- Details loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

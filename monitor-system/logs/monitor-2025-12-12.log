@@ -1,0 +1,52 @@
+[2025-12-12T08:56:40.887Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-12T08:56:40.889Z] INFO: Target: https://grivaseltinteractive.gr
+[2025-12-12T08:56:40.889Z] INFO: Triggered by: scheduled
+[2025-12-12T08:56:40.889Z] INFO: Running test: Website Availability
+[2025-12-12T08:56:40.889Z] INFO: [Website Availability] Starting test...
+[2025-12-12T08:56:43.669Z] INFO: [Website Availability] Navigating to https://grivaseltinteractive.gr
+[2025-12-12T08:56:45.077Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
+[2025-12-12T08:56:46.779Z] INFO: [Website Availability] PASS: Website is online
+[2025-12-12T08:56:46.925Z] INFO: [Website Availability] Completed in 6036ms
+[2025-12-12T08:56:46.925Z] INFO: ✅ Website Availability: PASS (6036ms)
+[2025-12-12T08:56:46.926Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-12T08:56:46.943Z] INFO: Test results saved to database with ID: 1
+[2025-12-12T09:05:44.618Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-12T09:05:44.620Z] INFO: Target: https://grivaseltinteractive.gr
+[2025-12-12T09:05:44.620Z] INFO: Triggered by: scheduled
+[2025-12-12T09:05:44.621Z] INFO: Running test: Website Availability
+[2025-12-12T09:05:44.622Z] INFO: [Website Availability] Starting test...
+[2025-12-12T09:05:46.058Z] INFO: [Website Availability] Navigating to https://grivaseltinteractive.gr
+[2025-12-12T09:05:47.939Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
+[2025-12-12T09:05:49.390Z] INFO: [Website Availability] PASS: Website is online
+[2025-12-12T09:05:49.556Z] INFO: [Website Availability] Completed in 4934ms
+[2025-12-12T09:05:49.556Z] INFO: ✅ Website Availability: PASS (4934ms)
+[2025-12-12T09:05:49.556Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-12T09:05:49.573Z] INFO: Test results saved to database with ID: 2
+[2025-12-12T12:40:03.982Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-12T12:40:03.983Z] INFO: Target: https://grivaseltinteractive.gr
+[2025-12-12T12:40:03.983Z] INFO: Triggered by: scheduled
+[2025-12-12T12:40:03.984Z] INFO: Running test: Website Availability
+[2025-12-12T12:40:03.984Z] INFO: [Website Availability] Starting test...
+[2025-12-12T12:40:05.528Z] INFO: [Website Availability] Navigating to https://grivaseltinteractive.gr
+[2025-12-12T12:40:06.886Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
+[2025-12-12T12:40:08.717Z] INFO: [Website Availability] PASS: Website is online
+[2025-12-12T12:40:08.929Z] INFO: [Website Availability] Completed in 4945ms
+[2025-12-12T12:40:08.930Z] INFO: ✅ Website Availability: PASS (4945ms)
+[2025-12-12T12:40:08.931Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-12T12:40:08.957Z] INFO: Test results saved to database with ID: 3
+[2025-12-12T12:40:08.960Z] INFO: JSON report saved: C:\WebsiteMonitor\monitor-system\reports\report-3-2025-12-12T12-40-08-958Z.json
+[2025-12-12T12:40:08.960Z] ERROR: Failed to save report: this.saveHtmlReport is not a function
+[2025-12-12T12:40:47.235Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-12T12:40:47.235Z] INFO: Target: https://grivaseltinteractive.gr
+[2025-12-12T12:40:47.236Z] INFO: Triggered by: scheduled
+[2025-12-12T12:40:47.237Z] INFO: Running test: Website Availability
+[2025-12-12T12:40:47.237Z] INFO: [Website Availability] Starting test...
+[2025-12-12T12:40:48.006Z] INFO: [Website Availability] Navigating to https://grivaseltinteractive.gr
+[2025-12-12T12:40:49.390Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
+[2025-12-12T12:40:51.172Z] INFO: [Website Availability] PASS: Website is online
+[2025-12-12T12:40:51.385Z] INFO: [Website Availability] Completed in 4148ms
+[2025-12-12T12:40:51.386Z] INFO: ✅ Website Availability: PASS (4148ms)
+[2025-12-12T12:40:51.386Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-12T12:40:51.404Z] INFO: Test results saved to database with ID: 4
+[2025-12-12T12:40:51.407Z] INFO: JSON report saved: C:\WebsiteMonitor\monitor-system\reports\report-4-2025-12-12T12-40-51-405Z.json
+[2025-12-12T12:40:51.408Z] ERROR: Failed to save report: this.saveHtmlReport is not a function
