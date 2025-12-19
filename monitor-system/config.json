@@ -1,11 +1,30 @@
 {
-  "website": {
-    "url": "https://grivaseltinteractive.gr",
-    "login": {
-      "username": "monitor@yourcompany.com",
-      "password": "your-secure-password"
+  
+  "websites": {
+    "eshop-website": {
+      "url": "https://eshop.grivas.gr/",
+      "login": {
+        "username": "monitor@yourcompany.com",
+        "password": "your-secure-password"
+      }  
+    }, 
+
+    "platform-website": {
+      "url": "https://grivaseltinteractive.gr",
+      "login": {
+        "username": "monitor@yourcompany.com",
+        "password": "your-secure-password"
+      }
+    },
+    "main-website": {
+      "url": "https://grivas.gr",
+      "login": {
+        "username": "monitor@yourcompany.com",
+        "password": "your-secure-password"
+      }
     }
   },
+    
   "smtp": {
     "host": "smtp.office365.com",
     "port": 587,

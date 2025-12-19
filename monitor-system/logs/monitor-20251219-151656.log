@@ -1,0 +1,24 @@
+[2025-12-19T13:16:58.464Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-19T13:16:58.466Z] INFO: Running test: [ -- Checking website availability -- ]
+[2025-12-19T13:16:59.143Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-19T13:16:59.144Z] INFO: [eshop-website] Starting test...
+[2025-12-19T13:16:59.145Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-19T13:17:20.906Z] WARN: Request failed: https://www.youtube.com/iframe_api - net::ERR_ABORTED
+[2025-12-19T13:17:33.711Z] INFO: [eshop-website] ✅ : Website is online
+[2025-12-19T13:17:33.712Z] INFO: ------------------------------------------
+[2025-12-19T13:17:33.712Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-19T13:17:33.712Z] INFO: [platform-website] Starting test...
+[2025-12-19T13:17:33.713Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-19T13:17:53.427Z] INFO: [platform-website] ✅ : Website is online
+[2025-12-19T13:17:53.427Z] INFO: ------------------------------------------
+[2025-12-19T13:17:53.427Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-19T13:17:53.428Z] INFO: [main-website] Starting test...
+[2025-12-19T13:17:53.428Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-19T13:18:01.372Z] WARN: Request failed: https://www.grivas.gr/site/assets/files/2254/whodunnit_banner_2025-1-1.120x0.jpg - net::ERR_ABORTED
+[2025-12-19T13:18:05.789Z] INFO: [main-website] ✅ : Website is online
+[2025-12-19T13:18:05.789Z] INFO: ------------------------------------------
+[2025-12-19T13:18:05.791Z] WARN: Request failed: https://www.youtube.com/embed/e5tZ-l7qrfY?playsinline=1&enablejsapi=1&origin=https%3A%2F%2Fwww.grivas.gr&widgetid=1&forigin=https%3A%2F%2Fwww.grivas.gr%2F&aoriginsup=1&vf=6 - net::ERR_ABORTED
+[2025-12-19T13:18:05.993Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (67526ms)
+[2025-12-19T13:18:05.994Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-19T13:18:06.016Z] INFO: Test results saved to database with ID: 39
+[2025-12-19T13:18:06.017Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')

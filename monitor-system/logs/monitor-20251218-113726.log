@@ -1,0 +1,21 @@
+[2025-12-18T09:37:28.483Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-18T09:37:28.485Z] INFO: Running test: [ -- Checking website availability -- ]
+[2025-12-18T09:37:29.171Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-18T09:37:29.171Z] INFO: [eshop-website] Starting test...
+[2025-12-18T09:37:29.172Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-18T09:37:35.349Z] INFO: [eshop-website] ✅ - PASS: Website is online
+[2025-12-18T09:37:35.350Z] INFO: ------------------------------------------
+[2025-12-18T09:37:35.350Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-18T09:37:35.350Z] INFO: [platform-website] Starting test...
+[2025-12-18T09:37:35.351Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-18T09:37:38.433Z] INFO: [platform-website] ✅ - PASS: Website is online
+[2025-12-18T09:37:38.433Z] INFO: ------------------------------------------
+[2025-12-18T09:37:38.433Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-18T09:37:38.433Z] INFO: [main-website] Starting test...
+[2025-12-18T09:37:38.433Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-18T09:37:41.918Z] INFO: [main-website] ✅ - PASS: Website is online
+[2025-12-18T09:37:41.918Z] INFO: ------------------------------------------
+[2025-12-18T09:37:42.154Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (13669ms)
+[2025-12-18T09:37:42.154Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-18T09:37:42.172Z] INFO: Test results saved to database with ID: 31
+[2025-12-18T09:37:42.173Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')

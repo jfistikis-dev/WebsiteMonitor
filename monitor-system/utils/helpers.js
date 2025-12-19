@@ -125,6 +125,7 @@ class Helpers {
     static d (...args) {
         console.log(...args);
     }
+
 }
 
 module.exports = Helpers;

@@ -327,7 +327,7 @@ class Database {
                     (SELECT COUNT(*) FROM test_runs WHERE DATE(timestamp) = DATE('now')) as today_runs,
                     (SELECT COUNT(*) FROM incidents WHERE status = 'open') as open_incidents,
                     (SELECT success_rate FROM test_runs ORDER BY timestamp DESC LIMIT 1) as last_success_rate,
-                    (SELECT AVG(success_rate) FROM test_runs WHERE timestamp >= datetime('now', '-7 days')) as weekly_avg
+                    (SELECT AVG(success_rate) FROM test_runs WHERE timestamp >= strftime('%s','now','-7 day')) as weekly_avg
             `;
             
             this.db.get(query, [], (err, row) => {

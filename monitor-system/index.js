@@ -56,8 +56,8 @@ class WebsiteMonitor {
 
     async runAllTests() {
         this.logger.info('=== Starting Website Monitoring Tests ===');
-        this.logger.info(`Target: ${config.website.url}`);
-        this.logger.info(`Triggered by: ${this.results.triggeredBy}`);
+        //this.logger.info(`Target: ${config.website.url}`);
+        //this.logger.info(`Triggered by: ${this.results.triggeredBy}`);
         
         const startTime = Date.now();
         
@@ -67,7 +67,7 @@ class WebsiteMonitor {
             
             // Execute tests sequentially
             for (const testInstance of testInstances) {
-                this.logger.info(`Running test: ${testInstance.name}`);
+                this.logger.info(`Running test: ${testInstance.name} `);
                 
                 const testResult = await testInstance.run();
                 this.results.tests.push(testResult);
@@ -134,7 +134,7 @@ class WebsiteMonitor {
     }
 
     saveReport() {
-        try {
+       try {
             const reportDir = path.join(__dirname, config.paths.reports);
             if (!fs.existsSync(reportDir)) {
                 fs.mkdirSync(reportDir, { recursive: true });
@@ -182,8 +182,8 @@ class WebsiteMonitor {
             });
             
             const subject = this.results.summary.failed > 0 
-                ? `🚨 WEBSITE ALERT: ${this.results.summary.failed} Test(s) Failed - ${config.website.url}`
-                : `✅ Website Monitoring Report - All Tests Passed - ${config.website.url}`;
+                ? `🚨 WEBSITE ALERT: ${this.results.summary.failed} Test(s) Failed`
+                : `✅ Website Monitoring Report - All Tests Passed`; 
             
             const htmlContent = this.generateEmailContent();
             

@@ -43,5 +43,8 @@ echo Starting dashboard on http://localhost:%DASHBOARD_PORT%
 echo Press Ctrl+C to stop
 echo.
 
+REM clear cache
+"%NODE_EXE%" dashboard/clear-cache.js
+
 REM Start dashboard
 "%NODE_EXE%" dashboard/server.js

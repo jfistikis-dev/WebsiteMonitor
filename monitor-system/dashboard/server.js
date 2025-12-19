@@ -3,7 +3,9 @@ console.log('=== SERVER STARTING - VERSION: ' + Date.now() + ' ===');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const helpers = require('../utils/helpers');
+
+const { formatUptimeForDashboard, formatDuration } = require('../utils/time-formatter');
+
 
 const activeTests = new Map();
 
@@ -45,16 +47,42 @@ const basicAuth = (req, res, next) => {
 };
 
 // API Routes
-app.get('/api/status', basicAuth, async (req, res) => {
-    try {
-        const status = await db.getCurrentStatus();
-        res.json(status);
-    } catch (error) {
 
-        console.error('Status API error:', error);
-        res.status(500).json({ error: error.message });
+app.get('/api/next-runtime', basicAuth, async (req, res) => {
+
+    let lastRuntime = await db.getRecentRuns(1);
+    lastRuntime = lastRuntime[0].timestamp; // MUST be ms
+
+    const intervalMs = config.monitoring.checkIntervalHours * 60 * 60 * 1000; // 3 ώρες
+    const now = Date.now();
+
+    let remainingMs ;
+
+    if (lastRuntime + intervalMs > now) {
+        // ✅ Δεν έγινε restart
+        remainingMs  = (lastRuntime + intervalMs) - now;
+    } else {
+        // 🔄 Έγινε restart στον server
+        const uptimeMs = process.uptime() * 1000;
+        remainingMs  = intervalMs - uptimeMs;
     }
-});
+
+    // safety net 🪂
+    remainingMs  = Math.max(0, remainingMs );
+
+    // ---------- format ----------
+    res.json({
+        interval: {
+            hours: config.monitoring.checkIntervalHours,
+            ms: intervalMs,
+            label: formatDuration(intervalMs)
+        },
+        remaining: {
+            ms: remainingMs ,
+            label: formatDuration(remainingMs )
+        }
+    });
+})
 
 
 app.get('/api/recent-runs', basicAuth, async (req, res) => {
@@ -147,9 +175,20 @@ app.get('/api/status', basicAuth, async (req, res) => {
         const enhancedStatus = {
             ...status,
             databaseSize: dbSize,
+            server : {
+                uptimeSeconds: process.uptime(),
+                uptimeFormatted: formatUptimeForDashboard(process.uptime(), {
+                    compact: true,
+                    precision: 3,
+                    showUpText: false
+                }),
+                nodeVersion: process.version,
+                platform: process.platform,
+                memoryUsage: process.memoryUsage(),
+                startTime: new Date(Date.now() - (process.uptime() * 1000)).toISOString()
+            },
             serverTime: new Date().toISOString(),
-            uptime: process.uptime(), // Node.js process uptime in seconds
-            memoryUsage: process.memoryUsage()
+            
         };
         
         res.json(enhancedStatus);
@@ -157,13 +196,10 @@ app.get('/api/status', basicAuth, async (req, res) => {
     } catch (error) {
         console.error('Status API error:', error);
         res.status(500).json({ error: error.message });
-    }
+    } 
 });
 
-// Dashboard home page
-app.get('*', basicAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+
 
 
 // Enhanced manual test with progress tracking
@@ -229,7 +265,8 @@ async function runEnhancedTests(testId, progress) {
         const totalTests = testInstances.length;
         
         let completedTests = 0;
-        
+
+
         // Run each test and update progress
         for (const testInstance of testInstances) {
             progress.currentTest = testInstance.name;
@@ -239,18 +276,18 @@ async function runEnhancedTests(testId, progress) {
             console.log(`📊 Test ${testId}: Running ${testInstance.name} (${progress.progress}%)`);
             
             // Simulate running the test (in real implementation, you'd run it)
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 8000));
             
             completedTests++;
         }
         
         // Actually run the tests
-        const results = await originalRunAllTests();
+        //const results = await originalRunAllTests();
         
         // Update progress
         progress.status = 'completed';
         progress.progress = 100;
-        progress.results = results;
+      //  progress.results = results;
         progress.endTime = Date.now();
         progress.duration = progress.endTime - progress.startTime;
         
@@ -282,10 +319,13 @@ async function runEnhancedTests(testId, progress) {
 // Get test progress
 app.get('/api/test-progress/:testId', basicAuth, async (req, res) => {
     try {
+        
         const testId = req.params.testId;
         const progress = activeTests.get(testId);
         
-        if (!progress) {
+        console.log ( "📊 Getting progress for test:", testId, progress );
+
+       if (!progress) {
             return res.status(404).json({
                 success: false,
                 error: 'Test not found or expired',
@@ -366,6 +406,11 @@ function estimateRemainingTime(progress) {
     const estimatedTotal = (elapsed / progress.progress) * 100;
     return Math.max(0, estimatedTotal - elapsed);
 }
+
+// Dashboard home page
+app.get('*', basicAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Start server
 app.listen(PORT, () => {

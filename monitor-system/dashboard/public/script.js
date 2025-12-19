@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAllData();
     
     // Auto-refresh every 30 seconds
-    autoRefreshInterval = setInterval(loadAllData, 30000);
+    //autoRefreshInterval = setInterval(loadAllData, 30000);
 });
 
 function initializeDashboard() {
@@ -58,7 +58,8 @@ async function loadAllData() {
             loadRecentRuns(),
             loadUptimeStats(),
             loadIncidents(),
-            loadDatabaseInfo()
+            loadDatabaseInfo(),
+            nextRunTime(),
         ]);
         
         updateLastUpdateTime();
@@ -72,7 +73,10 @@ async function loadSystemStatus() {
     try {
         const response = await fetch('/api/status');
         const data = await response.json();
-        
+
+        //document.getElementById('uptime-trend').textContent = "✅ Uptime :: " + data.server.uptimeFormatted;
+        document.getElementById('dashboard-uptime').textContent =  data.server.uptimeFormatted;
+
         // Update stats cards
         document.getElementById('current-uptime').textContent = 
             data.last_success_rate ? `${data.last_success_rate.toFixed(1)}%` : '--%';
@@ -143,6 +147,16 @@ async function loadRecentRuns() {
         console.error('Error loading recent runs:', error);
     }
 }
+
+async function nextRunTime () {
+    const response = await fetch('/api/next-runtime');
+    const nextRuntime = await response.json();
+    document.getElementById('today-runs').textContent = nextRuntime.remaining.label;
+    document.getElementById('last-run-time').textContent = `Every ${nextRuntime.interval.label}`;
+}
+
+
+
 
 async function loadUptimeStats() {
     try {
@@ -281,15 +295,18 @@ async function resolveIncident(incidentId) {
 // Enhanced manual test with progress tracking
 async function runEnhancedManualTest() {
     if (confirm('Run enhanced manual test with progress tracking?')) {
+        
         try {
-            const response = await fetch('/api/run-manual-test-enhanced', {
-                method: 'POST'
-            });
+
+            // Update monitoring state
+            document.getElementById('monitoring-state').textContent = 'Running...'; 
             
-            const result = await response.json();
+            const response  = await fetch('/api/run-manual-test-enhanced', {method: 'POST' });
+            const result    = await response.json();
             
             if (result.success) {
-                showSuccess('Enhanced test started with progress tracking!');
+                
+                showSuccess(result.message);
                 
                 // Open progress modal
                 openProgressModal(result.testId);
@@ -301,10 +318,13 @@ async function runEnhancedManualTest() {
                 showError(`Failed to start enhanced test: ${result.error}`);
             }
             
+            
         } catch (error) {
             console.error('Enhanced test error:', error);
             showError('Failed to start enhanced test');
+            
         }
+        
     }
 }
 
@@ -364,6 +384,7 @@ function closeProgressModal() {
 }
 
 async function pollTestProgress(testId) {
+   
     const interval = setInterval(async () => {
         try {
             const response = await fetch(`/api/test-progress/${testId}`);
@@ -374,7 +395,7 @@ async function pollTestProgress(testId) {
                 showError('Test progress not found');
                 return;
             }
-            
+           
             // Update UI
             const percent = progress.progress || 0;
             document.getElementById('progress-fill').style.width = `${percent}%`;
@@ -405,11 +426,14 @@ async function pollTestProgress(testId) {
                     showWarning('Test was cancelled');
                 }
                 
+                document.getElementById('monitoring-state').textContent = 'Idle'; 
+
                 // Auto-close modal after 5 seconds
                 setTimeout(() => {
                     closeProgressModal();
                 }, 5000);
             }
+            
             
         } catch (error) {
             console.error('Error polling progress:', error);
@@ -445,7 +469,12 @@ async function loadDatabaseInfo() {
     try {
         const response = await fetch('/api/database-info');
         const dbInfo = await response.json();
-        
+
+        // Update total runs
+        let result = dbInfo.tables.find(table => table.name === "test_runs");
+        const recordsValue = result ? result.records : null;
+        document.getElementById('total-runs').textContent = recordsValue;
+
         // Update database size
         const dbSizeElement = document.getElementById('db-size');
         if (dbSizeElement && dbInfo.sizeFormatted) {
@@ -491,10 +520,10 @@ function viewLogs() {
 }
 
 function refreshAll() {
-    clearInterval(autoRefreshInterval);
+   /* clearInterval(autoRefreshInterval);
     loadAllData();
     autoRefreshInterval = setInterval(loadAllData, 30000);
-    showSuccess('Refreshing all data...');
+    showSuccess('Refreshing all data...');*/
 }
 
 function updateLastUpdateTime() {
