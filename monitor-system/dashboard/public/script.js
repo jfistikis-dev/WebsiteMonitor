@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAllData();
     
     // Auto-refresh every 30 seconds
-    //autoRefreshInterval = setInterval(loadAllData, 30000);
+    autoRefreshInterval = setInterval(loadAllData, 30000);
 });
 
 function initializeDashboard() {
@@ -415,23 +415,21 @@ async function pollTestProgress(testId) {
                 clearInterval(interval);
                 
                 if (progress.status === 'completed') {
+                    
                     showSuccess('Test completed successfully!');
-                    // Refresh dashboard data
-                    setTimeout(() => {
-                        loadAllData();
-                    }, 2000);
+                    setTimeout(() => { loadAllData(); }, 2000); // Refresh dashboard data
+
                 } else if (progress.status === 'failed') {
                     showError(`Test failed: ${progress.error}`);
                 } else if (progress.status === 'cancelled') {
                     showWarning('Test was cancelled');
                 }
                 
-                document.getElementById('monitoring-state').textContent = 'Idle'; 
-
-                // Auto-close modal after 5 seconds
+                // Auto-close modal after 2 seconds
                 setTimeout(() => {
+                    document.getElementById('monitoring-state').textContent = 'Idle'; 
                     closeProgressModal();
-                }, 5000);
+                }, 2000);
             }
             
             
@@ -520,10 +518,10 @@ function viewLogs() {
 }
 
 function refreshAll() {
-   /* clearInterval(autoRefreshInterval);
+    clearInterval(autoRefreshInterval);
     loadAllData();
     autoRefreshInterval = setInterval(loadAllData, 30000);
-    showSuccess('Refreshing all data...');*/
+    showSuccess('Refreshing all data...');
 }
 
 function updateLastUpdateTime() {

@@ -256,3 +256,65 @@
 [2025-12-19T14:17:11.607Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (14579ms)
 [2025-12-19T14:17:11.607Z] INFO: === Tests Completed: 1 passed, 0 failed ===
 [2025-12-19T14:17:11.629Z] INFO: Test results saved to database with ID: 41
+[2025-12-19T14:31:34.947Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-19T14:31:36.412Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-19T14:31:36.414Z] INFO: [eshop-website] Starting test...
+[2025-12-19T14:31:36.415Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-19T14:31:43.650Z] INFO: [eshop-website] ✅ : Website is online
+[2025-12-19T14:31:43.651Z] INFO: ------------------------------------------
+[2025-12-19T14:31:43.651Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-19T14:31:43.651Z] INFO: [platform-website] Starting test...
+[2025-12-19T14:31:43.651Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-19T14:31:46.533Z] INFO: [platform-website] ✅ : Website is online
+[2025-12-19T14:31:46.533Z] INFO: ------------------------------------------
+[2025-12-19T14:31:46.534Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-19T14:31:46.534Z] INFO: [main-website] Starting test...
+[2025-12-19T14:31:46.534Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-19T14:31:50.486Z] INFO: [main-website] ✅ : Website is online
+[2025-12-19T14:31:50.486Z] INFO: ------------------------------------------
+[2025-12-19T14:31:50.756Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (15808ms)
+[2025-12-19T14:31:50.756Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-19T14:31:50.778Z] INFO: Test results saved to database with ID: 42
+[2025-12-19T14:31:50.779Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-19T14:33:59.964Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-19T14:34:00.688Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-19T14:34:00.691Z] INFO: [eshop-website] Starting test...
+[2025-12-19T14:34:00.692Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-19T14:34:05.835Z] INFO: [eshop-website] ✅ : Website is online
+[2025-12-19T14:34:05.836Z] INFO: ------------------------------------------
+[2025-12-19T14:34:05.836Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-19T14:34:05.836Z] INFO: [platform-website] Starting test...
+[2025-12-19T14:34:05.836Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-19T14:34:08.926Z] INFO: [platform-website] ✅ : Website is online
+[2025-12-19T14:34:08.927Z] INFO: ------------------------------------------
+[2025-12-19T14:34:08.927Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-19T14:34:08.927Z] INFO: [main-website] Starting test...
+[2025-12-19T14:34:08.927Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-19T14:34:10.382Z] WARN: Request failed: https://www.grivas.gr/site/assets/files/2254/whodunnit_banner_2025-1-1.120x0.jpg - net::ERR_ABORTED
+[2025-12-19T14:34:12.857Z] INFO: [main-website] ✅ : Website is online
+[2025-12-19T14:34:12.857Z] INFO: ------------------------------------------
+[2025-12-19T14:34:13.127Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (13161ms)
+[2025-12-19T14:34:13.127Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-19T14:34:13.150Z] INFO: Test results saved to database with ID: 43
+[2025-12-19T14:34:13.152Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-19T14:40:11.904Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-19T14:40:12.659Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-19T14:40:12.660Z] INFO: [eshop-website] Starting test...
+[2025-12-19T14:40:12.662Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-19T14:40:19.013Z] INFO: [eshop-website] ✅ : Website is online
+[2025-12-19T14:40:19.013Z] INFO: ------------------------------------------
+[2025-12-19T14:40:19.013Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-19T14:40:19.013Z] INFO: [platform-website] Starting test...
+[2025-12-19T14:40:19.013Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-19T14:40:21.856Z] INFO: [platform-website] ✅ : Website is online
+[2025-12-19T14:40:21.856Z] INFO: ------------------------------------------
+[2025-12-19T14:40:21.857Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-19T14:40:21.857Z] INFO: [main-website] Starting test...
+[2025-12-19T14:40:21.857Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-19T14:40:23.116Z] WARN: Request failed: https://www.grivas.gr/site/assets/files/2254/whodunnit_banner_2025-1-1.120x0.jpg - net::ERR_ABORTED
+[2025-12-19T14:40:25.110Z] INFO: [main-website] ✅ : Website is online
+[2025-12-19T14:40:25.111Z] INFO: ------------------------------------------
+[2025-12-19T14:40:25.400Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (13485ms)
+[2025-12-19T14:40:25.400Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-19T14:40:25.421Z] INFO: Test results saved to database with ID: 44
+[2025-12-19T14:40:25.422Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')

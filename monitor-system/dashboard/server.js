@@ -265,29 +265,53 @@ async function runEnhancedTests(testId, progress) {
         const totalTests = testInstances.length;
         
         let completedTests = 0;
-
+        monitor.logger.info('=== Starting Website Monitoring Tests ===');
+        const startTime = Date.now();
 
         // Run each test and update progress
         for (const testInstance of testInstances) {
+            
             progress.currentTest = testInstance.name;
             progress.progress = Math.round((completedTests / totalTests) * 100);
-            activeTests.set(testId, progress);
+            activeTests.set(testId, progress); // add it to activeTests list ...
             
             console.log(`📊 Test ${testId}: Running ${testInstance.name} (${progress.progress}%)`);
             
-            // Simulate running the test (in real implementation, you'd run it)
-            await new Promise(resolve => setTimeout(resolve, 8000));
+            const testResult = await testInstance.run();
+            monitor.results.tests.push(testResult);
+
+            const statusIcon = testResult.status === 'PASS' ? '✅' : 
+                                 testResult.status === 'SKIP' ? '⚠️' : '❌';
+            monitor.logger.info(`${statusIcon} ${testResult.name}: ${testResult.status} (${testResult.duration}ms)`);
             
+            // Stop on critical failure if configured
+            if (testResult.critical && testResult.status === 'FAIL' && config.monitoring.stopOnCriticalFailure) {
+                monitor.logger.error('Critical test failed, stopping test sequence');
+                break;
+            }
+
             completedTests++;
         }
+
+
+        // Calculate summary
+        monitor.results.summary.total   = monitor.results.tests.length;
+        monitor.results.summary.passed  = monitor.results.tests.filter(t => t.status === 'PASS').length;
+        monitor.results.summary.failed  = monitor.results.tests.filter(t => t.status === 'FAIL').length;
+        monitor.results.summary.successRate = monitor.results.summary.total > 0 
+            ? parseFloat(((monitor.results.summary.passed / monitor.results.summary.total) * 100).toFixed(2))
+            : 0;
         
-        // Actually run the tests
-        //const results = await originalRunAllTests();
+        monitor.results.duration = Date.now() - startTime;
+        monitor.logger.info(`=== Tests Completed: ${monitor.results.summary.passed} passed, ${monitor.results.summary.failed} failed ===`);
+
+        await monitor.processResults();
+
         
         // Update progress
         progress.status = 'completed';
         progress.progress = 100;
-      //  progress.results = results;
+        progress.results = monitor.results;
         progress.endTime = Date.now();
         progress.duration = progress.endTime - progress.startTime;
         
@@ -323,7 +347,7 @@ app.get('/api/test-progress/:testId', basicAuth, async (req, res) => {
         const testId = req.params.testId;
         const progress = activeTests.get(testId);
         
-        console.log ( "📊 Getting progress for test:", testId, progress );
+        //console.log ( "📊 Getting progress for test:", testId, progress );
 
        if (!progress) {
             return res.status(404).json({

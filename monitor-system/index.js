@@ -106,7 +106,7 @@ class WebsiteMonitor {
         
         return this.results;
     }
-
+    
     async processResults() {
         try {
             // Save to database
