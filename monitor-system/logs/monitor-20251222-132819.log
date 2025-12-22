@@ -1,0 +1,4 @@
+[2025-12-22T11:28:21.360Z] INFO: === Starting Website Monitoring Tests ===
+🎯 Running 2 tests...
+[2025-12-22T11:28:21.362Z] INFO: === ${testInstances.length} tests ===
+Fatal error: Cannot read properties of undefined (reading 'failed')

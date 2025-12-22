@@ -11,10 +11,18 @@
 
     "platform-website": {
       "url": "https://grivaseltinteractive.gr",
-      "login": {
-        "username": "monitor@yourcompany.com",
-        "password": "your-secure-password"
-      }
+      "username": "support@grivas.gr",
+      "password": "admin_23#",
+      "loginUrl": "https://grivaseltinteractive.gr",
+      "logoutUrl": "https://grivaseltinteractive.gr/logout",
+      "selectors": {
+              "usernameInput": "input[name='email']",
+              "passwordInput": "input[name='password']",
+              "loginButton": "button[type='submit']",
+              "logoutButton": "ul.dropdown-menu.dropdown-menu-end>li:last-child>a #logout-btn",
+              "userProfile": ".user-menu",
+              "loginForm": "form.login-form"
+          }
     },
     "main-website": {
       "url": "https://grivas.gr",

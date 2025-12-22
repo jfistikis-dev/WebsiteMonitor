@@ -1,0 +1,7 @@
+[2025-12-22T14:07:07.791Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T14:07:07.793Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T14:07:09.423Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T14:07:09.424Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:07:09.424Z] INFO: [PLatform Login] Attempting login...
+[2025-12-22T14:07:12.300Z] INFO: [PLatform Login] Completed in 4506ms
+[2025-12-22T14:07:12.301Z] ERROR: Fatal error in test execution: Protocol error (Page.captureScreenshot): Cannot take screenshot with 0 width.

@@ -1,0 +1,20 @@
+[2025-12-22T14:09:35.260Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T14:09:35.263Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T14:09:36.105Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T14:09:36.106Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:09:36.107Z] INFO: [PLatform Login] Attempting login...
+[2025-12-22T14:09:40.151Z] INFO: [PLatform Login] Verifying login...
+📸 Debug info captured: {
+  screenshot: 'error-2025-12-22T14-10-10-160Z.png',
+  consoleLogs: [],
+  error: 'Navigation timeout of 30000 ms exceeded'
+}
+[2025-12-22T14:10:10.354Z] ERROR: [PLatform Login] FAIL: Navigation timeout of 30000 ms exceeded
+[2025-12-22T14:10:10.540Z] INFO: [PLatform Login] Completed in 35276ms
+[2025-12-22T14:10:10.540Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (35276ms)
+[2025-12-22T14:10:10.540Z] INFO: ==================================================================
+[2025-12-22T14:10:10.540Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T14:10:10.564Z] INFO: Test results saved to database with ID: 63
+[2025-12-22T14:10:10.564Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T14:10:10.565Z] INFO: Preparing email alert...
+[2025-12-22T14:10:10.565Z] ERROR: Failed to send alert email: nodemailer is not defined

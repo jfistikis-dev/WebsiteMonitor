@@ -1,0 +1,23 @@
+[2025-12-22T12:58:28.897Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T12:58:28.898Z] INFO: Running test: [ -- Checking website availability -- ]
+[2025-12-22T12:58:30.177Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-22T12:58:30.178Z] INFO: [eshop-website] Starting test...
+[2025-12-22T12:58:30.178Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-22T12:59:11.274Z] INFO: [eshop-website] ✅ : Website is online
+[2025-12-22T12:59:11.274Z] INFO: ------------------------------------------
+[2025-12-22T12:59:11.274Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-22T12:59:11.274Z] INFO: [platform-website] Starting test...
+[2025-12-22T12:59:11.275Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T12:59:27.925Z] INFO: [platform-website] ✅ : Website is online
+[2025-12-22T12:59:27.925Z] INFO: ------------------------------------------
+[2025-12-22T12:59:27.925Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-22T12:59:27.925Z] INFO: [main-website] Starting test...
+[2025-12-22T12:59:27.925Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-22T12:59:36.902Z] WARN: Request failed: https://www.grivas.gr/site/assets/files/2254/whodunnit_banner_2025-1-1.120x0.jpg - net::ERR_ABORTED
+[2025-12-22T12:59:55.024Z] INFO: [main-website] ✅ : Website is online
+[2025-12-22T12:59:55.024Z] INFO: ------------------------------------------
+[2025-12-22T12:59:55.434Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (86535ms)
+[2025-12-22T12:59:55.434Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T12:59:55.435Z] INFO: [[ -- Checking login on platform -- ]] Starting test...
+[2025-12-22T12:59:56.317Z] INFO: [[ -- Checking login on platform -- ]] Completed in 882ms
+[2025-12-22T12:59:56.317Z] ERROR: Fatal error in test execution: page is not defined

@@ -1,0 +1,12 @@
+[2025-12-22T13:33:21.576Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T13:33:21.578Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T13:33:22.538Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T13:33:22.539Z] INFO: [PLatform Login] Navigating to undefined
+[2025-12-22T13:33:22.764Z] INFO: [PLatform Login] Completed in 1185ms
+[2025-12-22T13:33:22.765Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (1185ms)
+[2025-12-22T13:33:22.766Z] INFO: ==================================================================
+[2025-12-22T13:33:22.766Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T13:33:22.796Z] INFO: Test results saved to database with ID: 56
+[2025-12-22T13:33:22.797Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T13:33:22.798Z] INFO: Preparing email alert...
+[2025-12-22T13:33:22.798Z] ERROR: Failed to send alert email: nodemailer is not defined

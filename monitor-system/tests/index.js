@@ -1,5 +1,6 @@
 // Test registry - central place to register all tests
 const AvailabilityTest = require('./availability.test');
+const LoginPlatformTest = require('./loginPlatform.test');
 /*const AuthenticationTest = require('../development/authentication.test');
 const PasswordResetTest = require('../development/password-reset.test');
 const PerformanceTest = require('../development/performance.test');
@@ -46,6 +47,12 @@ registry.register(AvailabilityTest, {
     order: 10,
     description: 'Checks if website is accessible'
 });
+registry.register(LoginPlatformTest, { 
+    enabled: true, 
+    order: 20,
+    description: 'Checks if a user can login to platform '
+});
+
 /*
 registry.register(AuthenticationTest, { 
     enabled: true, 

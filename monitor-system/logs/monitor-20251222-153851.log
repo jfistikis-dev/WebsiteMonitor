@@ -1,0 +1,21 @@
+[2025-12-22T13:38:52.871Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T13:38:52.872Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T13:38:53.763Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T13:38:53.764Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+🔐 Attempting login...
+[2025-12-22T13:38:53.766Z] INFO: [PLatform Login] Attempting login...
+[2025-12-22T13:39:06.185Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
+📸 Debug info captured: {
+  screenshot: 'error-2025-12-22T13-39-07-887Z.png',
+  consoleLogs: [],
+  error: "Cannot read properties of undefined (reading 'usernameInput')"
+}
+[2025-12-22T13:39:08.017Z] ERROR: [PLatform Login] FAIL: Cannot read properties of undefined (reading 'usernameInput')
+[2025-12-22T13:39:08.190Z] INFO: [PLatform Login] Completed in 15317ms
+[2025-12-22T13:39:08.190Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (15317ms)
+[2025-12-22T13:39:08.190Z] INFO: ==================================================================
+[2025-12-22T13:39:08.190Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T13:39:08.210Z] INFO: Test results saved to database with ID: 59
+[2025-12-22T13:39:08.211Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T13:39:08.212Z] INFO: Preparing email alert...
+[2025-12-22T13:39:08.212Z] ERROR: Failed to send alert email: nodemailer is not defined

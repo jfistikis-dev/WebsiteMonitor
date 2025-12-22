@@ -56,11 +56,10 @@ class WebsiteMonitor {
 
     async runAllTests() {
         this.logger.info('=== Starting Website Monitoring Tests ===');
-        //this.logger.info(`Target: ${config.website.url}`);
-        //this.logger.info(`Triggered by: ${this.results.triggeredBy}`);
         
         const startTime = Date.now();
-        
+
+
         try {
             // Get all registered tests in sequence
             const testInstances = this.testRegistry.getTests(config, this.logger);
@@ -82,6 +81,7 @@ class WebsiteMonitor {
                     this.logger.error('Critical test failed, stopping test sequence');
                     break;
                 }
+                this.logger.info(`==================================================================`);
             }
             
             // Calculate summary
@@ -104,7 +104,7 @@ class WebsiteMonitor {
             this.results.error = error.message;
         }
         
-        return this.results;
+        return this.results; 
     }
     
     async processResults() {

@@ -1,0 +1,17 @@
+[2025-12-22T13:28:23.918Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T13:28:23.919Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T13:28:24.742Z] INFO: [PLatform Login] Starting test...
+📸 Debug info captured: {
+  screenshot: 'error-2025-12-22T13-28-24-743Z.png',
+  consoleLogs: [],
+  error: 'website is not defined'
+}
+[2025-12-22T13:28:24.879Z] ERROR: [PLatform Login] FAIL: website is not defined
+[2025-12-22T13:28:25.024Z] INFO: [PLatform Login] Completed in 1104ms
+[2025-12-22T13:28:25.024Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (1104ms)
+[2025-12-22T13:28:25.025Z] INFO: ==================================================================
+[2025-12-22T13:28:25.025Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T13:28:25.048Z] INFO: Test results saved to database with ID: 54
+[2025-12-22T13:28:25.049Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T13:28:25.050Z] INFO: Preparing email alert...
+[2025-12-22T13:28:25.050Z] ERROR: Failed to send alert email: nodemailer is not defined

@@ -1,0 +1,21 @@
+[2025-12-22T14:18:19.723Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T14:18:19.725Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T14:18:20.473Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T14:18:20.474Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:18:20.475Z] INFO: [PLatform Login] Attempting login...
+[2025-12-22T14:18:24.382Z] INFO: [PLatform Login] Verifying login...
+[2025-12-22T14:18:24.382Z] INFO: [PLatform Login] PASS: Login verified
+[2025-12-22T14:18:24.382Z] INFO: [PLatform Login] Attempting logout...
+[2025-12-22T14:18:25.224Z] INFO: [PLatform Login] PASS: Logout successful
+[2025-12-22T14:18:25.224Z] INFO: [PLatform Login] Verifying logout...
+[2025-12-22T14:18:25.226Z] INFO: [PLatform Login] PASS: Logout verified
+✅ Login/Logout test passed successfully!
+[2025-12-22T14:18:25.226Z] INFO: [PLatform Login] PASS: Login/Logout test passed successfully!
+[2025-12-22T14:18:25.406Z] INFO: [PLatform Login] Completed in 5681ms
+[2025-12-22T14:18:25.406Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (5681ms)
+[2025-12-22T14:18:25.406Z] INFO: ==================================================================
+[2025-12-22T14:18:25.406Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T14:18:25.426Z] INFO: Test results saved to database with ID: 67
+[2025-12-22T14:18:25.426Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T14:18:25.427Z] INFO: Preparing email alert...
+[2025-12-22T14:18:25.427Z] ERROR: Failed to send alert email: nodemailer is not defined

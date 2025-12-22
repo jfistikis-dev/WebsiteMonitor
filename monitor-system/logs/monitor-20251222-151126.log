@@ -1,0 +1,5 @@
+[2025-12-22T13:11:27.891Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T13:11:27.892Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T13:11:27.893Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T13:11:29.019Z] INFO: [PLatform Login] Completed in 1126ms
+[2025-12-22T13:11:29.020Z] ERROR: Fatal error in test execution: page is not defined

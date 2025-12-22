@@ -1,0 +1,18 @@
+[2025-12-22T14:45:37.196Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T14:45:37.197Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T14:45:38.043Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T14:45:38.044Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:45:38.044Z] INFO: [PLatform Login] 🤞 Attempting login...
+[2025-12-22T14:45:41.922Z] INFO: [PLatform Login] 🤞 Verifying login...
+[2025-12-22T14:45:41.922Z] INFO: [PLatform Login] ✅ PASS: Login verified
+[2025-12-22T14:45:41.923Z] INFO: [PLatform Login] 🚪 Attempting logout...
+[2025-12-22T14:45:42.749Z] INFO: [PLatform Login] ✅ PASS: Logout successful
+[2025-12-22T14:45:42.749Z] INFO: [PLatform Login] 🤞 Verifying logout...
+[2025-12-22T14:45:42.751Z] INFO: [PLatform Login] ✅ PASS: Logout verified
+[2025-12-22T14:45:42.751Z] INFO: [PLatform Login] ✅ PASS: Login/Logout test passed successfully!
+[2025-12-22T14:45:42.948Z] INFO: [PLatform Login] Completed in 5750ms
+[2025-12-22T14:45:42.949Z] INFO: ✅ [ -- Checking login on platform -- ]: PASS (5750ms)
+[2025-12-22T14:45:42.949Z] INFO: ==================================================================
+[2025-12-22T14:45:42.949Z] INFO: === Tests Completed: 1 passed, 0 failed ===
+[2025-12-22T14:45:42.973Z] INFO: Test results saved to database with ID: 70
+[2025-12-22T14:45:42.974Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')

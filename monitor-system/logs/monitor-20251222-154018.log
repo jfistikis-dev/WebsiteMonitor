@@ -1,0 +1,20 @@
+[2025-12-22T13:40:20.330Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T13:40:20.332Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T13:40:21.059Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T13:40:21.060Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T13:40:21.060Z] INFO: [PLatform Login] Attempting login...
+[2025-12-22T13:40:31.329Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
+📸 Debug info captured: {
+  screenshot: 'error-2025-12-22T13-40-35-444Z.png',
+  consoleLogs: [],
+  error: "No element found for selector: button[name='submit']"
+}
+[2025-12-22T13:40:35.572Z] ERROR: [PLatform Login] FAIL: No element found for selector: button[name='submit']
+[2025-12-22T13:40:35.731Z] INFO: [PLatform Login] Completed in 15399ms
+[2025-12-22T13:40:35.731Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (15399ms)
+[2025-12-22T13:40:35.732Z] INFO: ==================================================================
+[2025-12-22T13:40:35.732Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T13:40:35.752Z] INFO: Test results saved to database with ID: 60
+[2025-12-22T13:40:35.752Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T13:40:35.752Z] INFO: Preparing email alert...
+[2025-12-22T13:40:35.753Z] ERROR: Failed to send alert email: nodemailer is not defined

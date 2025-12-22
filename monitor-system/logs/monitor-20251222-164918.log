@@ -1,0 +1,37 @@
+[2025-12-22T14:49:20.587Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T14:49:20.589Z] INFO: Running test: [ -- Checking website availability -- ]
+[2025-12-22T14:49:21.429Z] INFO: [eshop-website] Checking [ https://eshop.grivas.gr/ ] availability...
+[2025-12-22T14:49:21.430Z] INFO: [eshop-website] Starting test...
+[2025-12-22T14:49:21.431Z] INFO: [eshop-website] Navigating to https://eshop.grivas.gr/
+[2025-12-22T14:49:28.108Z] INFO: [eshop-website] ✅ : Website is online
+[2025-12-22T14:49:28.109Z] INFO: ------------------------------------------
+[2025-12-22T14:49:28.109Z] INFO: [platform-website] Checking [ https://grivaseltinteractive.gr ] availability...
+[2025-12-22T14:49:28.109Z] INFO: [platform-website] Starting test...
+[2025-12-22T14:49:28.109Z] INFO: [platform-website] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:49:31.732Z] INFO: [platform-website] ✅ : Website is online
+[2025-12-22T14:49:31.732Z] INFO: ------------------------------------------
+[2025-12-22T14:49:31.732Z] INFO: [main-website] Checking [ https://grivas.gr ] availability...
+[2025-12-22T14:49:31.732Z] INFO: [main-website] Starting test...
+[2025-12-22T14:49:31.732Z] INFO: [main-website] Navigating to https://grivas.gr
+[2025-12-22T14:49:33.365Z] WARN: Request failed: https://www.grivas.gr/site/assets/files/2254/whodunnit_banner_2025-1-1.120x0.jpg - net::ERR_ABORTED
+[2025-12-22T14:49:35.373Z] INFO: [main-website] ✅ : Website is online
+[2025-12-22T14:49:35.373Z] INFO: ------------------------------------------
+[2025-12-22T14:49:35.663Z] INFO: ✅ [ -- Checking website availability -- ]: PASS (15074ms)
+[2025-12-22T14:49:35.663Z] INFO: ==================================================================
+[2025-12-22T14:49:35.663Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T14:49:36.251Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T14:49:36.252Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:49:36.252Z] INFO: [PLatform Login] 🤞 Attempting login...
+[2025-12-22T14:49:40.238Z] INFO: [PLatform Login] 🤞 Verifying login...
+[2025-12-22T14:49:40.238Z] INFO: [PLatform Login] ✅ PASS: Login verified
+[2025-12-22T14:49:40.238Z] INFO: [PLatform Login] 🚪 Attempting logout...
+[2025-12-22T14:49:41.101Z] INFO: [PLatform Login] ✅ PASS: Logout successful
+[2025-12-22T14:49:41.101Z] INFO: [PLatform Login] 🤞 Verifying logout...
+[2025-12-22T14:49:41.103Z] INFO: [PLatform Login] ✅ PASS: Logout verified
+[2025-12-22T14:49:41.103Z] INFO: [PLatform Login] ✅ PASS: Login/Logout test passed successfully!
+[2025-12-22T14:49:41.297Z] INFO: [PLatform Login] Completed in 5633ms
+[2025-12-22T14:49:41.298Z] INFO: ✅ [ -- Checking login on platform -- ]: PASS (5633ms)
+[2025-12-22T14:49:41.298Z] INFO: ==================================================================
+[2025-12-22T14:49:41.298Z] INFO: === Tests Completed: 2 passed, 0 failed ===
+[2025-12-22T14:49:41.322Z] INFO: Test results saved to database with ID: 71
+[2025-12-22T14:49:41.324Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')

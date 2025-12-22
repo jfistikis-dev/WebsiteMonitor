@@ -1,0 +1,27 @@
+[2025-12-22T14:10:31.692Z] INFO: === Starting Website Monitoring Tests ===
+[2025-12-22T14:10:31.694Z] INFO: Running test: [ -- Checking login on platform -- ]
+[2025-12-22T14:10:32.446Z] INFO: [PLatform Login] Starting test...
+[2025-12-22T14:10:32.447Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
+[2025-12-22T14:10:32.449Z] INFO: [PLatform Login] Attempting login...
+[2025-12-22T14:10:36.604Z] INFO: [PLatform Login] Verifying login...
+[2025-12-22T14:10:36.604Z] INFO: [PLatform Login] PASS: Login verified
+🚪 Attempting logout...
+[2025-12-22T14:10:36.604Z] INFO: [PLatform Login] Attempting logout...
+✅ Logout successful
+[2025-12-22T14:10:37.583Z] INFO: [PLatform Login] PASS: Logout successful
+🔍 Verifying logout...
+[2025-12-22T14:10:37.583Z] INFO: [PLatform Login] Verifying logout...
+📸 Debug info captured: {
+  screenshot: 'error-2025-12-22T14-10-37-585Z.png',
+  consoleLogs: [],
+  error: 'page.url(...).then is not a function'
+}
+[2025-12-22T14:10:37.705Z] ERROR: [PLatform Login] FAIL: page.url(...).then is not a function
+[2025-12-22T14:10:37.898Z] INFO: [PLatform Login] Completed in 6204ms
+[2025-12-22T14:10:37.898Z] INFO: ❌ [ -- Checking login on platform -- ]: FAIL (6204ms)
+[2025-12-22T14:10:37.898Z] INFO: ==================================================================
+[2025-12-22T14:10:37.898Z] INFO: === Tests Completed: 0 passed, 1 failed ===
+[2025-12-22T14:10:37.917Z] INFO: Test results saved to database with ID: 64
+[2025-12-22T14:10:37.918Z] ERROR: Failed to save report: Cannot read properties of undefined (reading 'url')
+[2025-12-22T14:10:37.918Z] INFO: Preparing email alert...
+[2025-12-22T14:10:37.918Z] ERROR: Failed to send alert email: nodemailer is not defined
