@@ -1,8 +1,0 @@
-[2025-12-22T13:52:44.219Z] INFO: === Starting Website Monitoring Tests ===
-[2025-12-22T13:52:44.221Z] INFO: Running test: [ -- Checking login on platform -- ]
-[2025-12-22T13:52:45.108Z] INFO: [PLatform Login] Starting test...
-[2025-12-22T13:52:45.109Z] INFO: [PLatform Login] Navigating to https://grivaseltinteractive.gr
-[2025-12-22T13:52:45.109Z] INFO: [PLatform Login] Attempting login...
-[2025-12-22T13:52:46.111Z] WARN: Request failed: https://kit.fontawesome.com/42d5adcbca.js - net::ERR_ABORTED
-[2025-12-22T13:52:47.742Z] INFO: [PLatform Login] Completed in 3521ms
-[2025-12-22T13:52:47.742Z] ERROR: Fatal error in test execution: Protocol error (Page.captureScreenshot): Cannot take screenshot with 0 width.
