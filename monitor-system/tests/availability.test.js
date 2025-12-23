@@ -1,11 +1,11 @@
-const puppeteer = require('puppeteer');
 const BrowserManager = require('../utils/browser');
 
 class AvailabilityTest {
     constructor(config, logger) {
         this.config = config;
         this.logger = logger;
-        this.name = '[ -- Checking website availability -- ]';
+        this.title = '[ -- Checking website availability -- ]';
+        this.name = 'Website availability';
         this.category = 'availability';
         this.critical = true;
         this.description = `Checks if accessibility and responding on :: `;
@@ -26,14 +26,12 @@ class AvailabilityTest {
             metrics: {}
         };
         
-        let browser = null;
+        
         const startTime = Date.now();
         
-
         // Use browser manager for better resource handling
-        browser = await require('puppeteer').launch({
+        let browser = await BrowserManager.launch({
             headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
             timeout: this.config.monitoring.timeoutSeconds * 1000
         });
         
@@ -164,7 +162,7 @@ class AvailabilityTest {
              if (browser) { await browser.close(); }
 
             test.duration = Date.now() - startTime;
-            //this.logger.info(`[${this.name}] Completed in ${test.duration}ms`);
+            this.logger.info(`[${this.name}] Completed in ${test.duration}ms`);
         }
         
         return test;

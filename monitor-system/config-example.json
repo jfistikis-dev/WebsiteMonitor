@@ -1,0 +1,83 @@
+{
+  
+  "websites": {
+    "eshop-website": {
+      "url": "https://yourcompany.com/",
+      "login": {
+        "username": "monitor@yourcompany.com",
+        "password": "your-secure-password"
+      }  
+    }, 
+
+    "platform-website": {
+      "url": "https://yourcompany.com/",
+      "username": "monitor@yourcompany.com",
+      "password": "your-secure-password",
+      "loginUrl": "https://yourcompany.com/",
+      "logoutUrl": "https://yourcompany.com/logout",
+      "selectors": {
+              "usernameInput": "input[name='email']",
+              "passwordInput": "input[name='password']",
+              "loginButton": "button[type='submit']",
+              "logoutButton": "ul.dropdown-menu.dropdown-menu-end>li:last-child>a #logout-btn",
+              "userProfile": ".user-menu",
+              "loginForm": "form.login-form"
+          }
+    },
+    "main-website": {
+      "url": "https://yourcompany.com/",
+      "login": {
+        "username": "monitor@yourcompany.com",
+        "password": "your-secure-password"
+      }
+    }
+  },
+    
+  "smtp": {
+    "host": "smtp.office365.com",
+    "port": 587,
+    "secure": false,
+    "auth": {
+      "user": "alerts@yourcompany.com",
+      "pass": "your-password"
+    }
+  },
+  "alerts": {
+    "recipients": ["admin@yourcompany.com", "ops@yourcompany.com"],
+    "sendOnSuccess": false,
+    "sendOnFailure": true
+  },
+  "database": {
+    "type": "sqlite",  
+    "sqlite": {
+      "path": "./data/monitoring.sqlite"
+    },
+    "mysql": {
+      "host": "localhost",
+      "user": "monitor",
+      "password": "password",
+      "database": "website_monitor"
+    }
+  },
+  "dashboard": {
+    "port": 3000,
+    "auth": {
+      "enabled": false,
+      "username": "admin",
+      "password": "securepassword123"
+    },
+    "retentionDays": 90  
+  },
+  "monitoring": {
+    "checkIntervalHours": 2,
+    "timeoutSeconds": 60,
+    "retryAttempts": 2,
+    "retryDelaySeconds": 10
+  },
+  "paths": {
+    "reports": "./reports",
+    "logs": "./logs",
+    "screenshots": "./screenshots",
+    "data": "./data"
+  }
+}

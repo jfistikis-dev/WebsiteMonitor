@@ -59,14 +59,13 @@ class WebsiteMonitor {
         
         const startTime = Date.now();
 
-
         try {
             // Get all registered tests in sequence
             const testInstances = this.testRegistry.getTests(config, this.logger);
             
             // Execute tests sequentially
             for (const testInstance of testInstances) {
-                this.logger.info(`Running test: ${testInstance.name} `);
+                this.logger.info(`${testInstance.title}`);
                 
                 const testResult = await testInstance.run();
                 this.results.tests.push(testResult);
@@ -150,7 +149,7 @@ class WebsiteMonitor {
             const reportData = {
                 ...this.results,
                 config: {
-                    website: config.website.url,
+                    //website: config.website.url,
                     timestamp: new Date().toISOString()
                 }
             };
