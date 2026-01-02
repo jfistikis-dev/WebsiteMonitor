@@ -164,47 +164,115 @@ class WebsiteMonitor {
             this.logger.error(`Failed to save report: ${error.message}`);
         }
     }
+
+     saveHtmlReport(report, filepath) {
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Website Monitoring Report</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; }
+                .header { background: #2c3e50; color: white; padding: 20px; border-radius: 5px; }
+                .summary { background: #ecf0f1; padding: 20px; border-radius: 5px; margin: 20px 0; }
+                .test { padding: 15px; margin: 10px 0; border-radius: 5px; }
+                .pass { background: #d4edda; border-left: 5px solid #28a745; }
+                .fail { background: #f8d7da; border-left: 5px solid #dc3545; }
+                .critical { font-weight: bold; }
+                .timestamp { color: #7f8c8d; font-size: 0.9em; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>📊 Website Monitoring Report</h1>
+                <p class="timestamp">Generated: ${new Date(report.timestamp).toLocaleString()}</p>
+            </div>
+            
+            <div class="summary">
+                <h2>Summary</h2>
+                <p><strong>Total Tests:</strong> ${report.summary.total}</p>
+                <p><strong>Passed:</strong> <span style="color: green;">${report.summary.passed}</span></p>
+                <p><strong>Failed:</strong> <span style="color: red;">${report.summary.failed}</span></p>
+                <p><strong>Success Rate:</strong> ${report.summary.total > 0 ? Math.round((report.summary.passed / report.summary.total) * 100) : 0}%</p>
+            </div>
+            
+            <h2>Test Results</h2>
+            ${report.tests.map(test => `
+                <div class="test ${test.status === 'PASS' ? 'pass' : 'fail'}">
+                    <h3>${test.status === 'PASS' ? '✅' : '❌'} ${test.name} ${test.critical ? '(Critical)' : ''}</h3>
+                    <p><strong>Status:</strong> ${test.status}</p>
+                    <p><strong>Details:</strong> ${test.details}</p>
+                    ${test.screenshot ? `<p><strong>Screenshot:</strong> ${test.screenshot}</p>` : ''}
+                </div>
+            `).join('')}
+        </body>
+        </html>`;
+        
+        fs.writeFileSync(filepath, html);
+    }
+
     async sendAlert() {
         try {
-            if (!config.smtp.host || !config.smtp.auth.user) {
-                this.logger.warn('Email alerts not configured, skipping');
-                return;
-            }
             
             this.logger.info('Preparing email alert...');
-            
-            const transporter = nodemailer.createTransport({
-                host: config.smtp.host,
-                port: config.smtp.port,
-                secure: config.smtp.secure,
-                auth: config.smtp.auth
-            });
-            
+                    
             const subject = this.results.summary.failed > 0 
                 ? `🚨 WEBSITE ALERT: ${this.results.summary.failed} Test(s) Failed`
                 : `✅ Website Monitoring Report - All Tests Passed`; 
             
             const htmlContent = this.generateEmailContent();
+
+            const response = await fetch(config.apiMailSender.host, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-KEY': config.apiMailSender.apikey
+                },
+                body: JSON.stringify({
+                    //app: 'web-monitor-worker',
+                    message: htmlContent,
+                    subject: subject,
+                    recipients: config.apiMailSender.recipients,
+                    timestamp: new Date().toISOString()
+                })
+            });
             
-            const mailOptions = {
-                from: `"Website Monitor" <${config.smtp.auth.user}>`,
-                to: config.alerts.recipients.join(', '),
-                subject,
-                html: htmlContent,
-                attachments: this.results.summary.failed > 0 ? [
-                    {
-                        filename: 'report.html',
-                        path: path.join(__dirname, config.paths.reports, `report-${this.results.runId || 'latest'}.html`)
-                    }
-                ] : []
-            };
-            
-            await transporter.sendMail(mailOptions);
+            //const data = await response.json();   // or response.text()
+            this.logger.info('Post to email server :: ' + response.status);
             this.logger.info('Alert email sent successfully');
             
         } catch (error) {
             this.logger.error(`Failed to send alert email: ${error.message}`);
         }
+    }
+
+    generateEmailContent() {
+        
+        const failedTests = this.results.tests.filter(t => t.status !== 'PASS');
+        
+        return `
+        <h2>Website Monitoring Alert</h2>
+        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+        
+        <h3>🚨 ${failedTests.length} Test(s) Failed</h3>
+        <ul>
+            ${failedTests.map(test => `
+                <li>
+                    <strong>${test.name} ${test.critical ? '(CRITICAL)' : ''}</strong><br>
+                    ${test.details}
+                </li>
+            `).join('')}
+        </ul>
+        
+        <h3>📊 Summary</h3>
+        <p>Total Tests: ${this.results.summary.total}</p>
+        <p>Passed: <span style="color: green;">${this.results.summary.passed}</span></p>
+        <p>Failed: <span style="color: red;">${this.results.summary.failed}</span></p>
+        
+        <hr>
+        <p><small>This is an automated alert from your Website Monitoring System.</small></p>
+        `;
+    
     }
 
     cleanup() {
@@ -217,6 +285,9 @@ class WebsiteMonitor {
         }
     }
 }
+
+
+
 
 // Main execution
 async function main() {
