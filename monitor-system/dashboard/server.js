@@ -200,8 +200,6 @@ app.get('/api/status', basicAuth, async (req, res) => {
 });
 
 
-
-
 // Enhanced manual test with progress tracking
 app.post('/api/run-manual-test-enhanced', basicAuth, async (req, res) => {
     try {
@@ -249,6 +247,389 @@ app.post('/api/run-manual-test-enhanced', basicAuth, async (req, res) => {
         });
     }
 });
+
+// Get test progress
+app.get('/api/test-progress/:testId', basicAuth, async (req, res) => {
+    try {
+        
+        const testId = req.params.testId;
+        const progress = activeTests.get(testId);
+        
+        //console.log ( "📊 Getting progress for test:", testId, progress );
+
+       if (!progress) {
+            return res.status(404).json({
+                success: false,
+                error: 'Test not found or expired',
+                testId: testId
+            });
+        }
+        
+        res.json({
+            success: true,
+            ...progress,
+            estimatedTimeRemaining: progress.status === 'running' 
+                ? estimateRemainingTime(progress) 
+                : 0
+        });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Cancel a running test
+app.post('/api/cancel-test/:testId', basicAuth, async (req, res) => {
+    try {
+        const testId = req.params.testId;
+        const progress = activeTests.get(testId);
+        
+        if (!progress) {
+            return res.status(404).json({
+                success: false,
+                error: 'Test not found'
+            });
+        }
+        
+        if (progress.status !== 'running') {
+            return res.json({
+                success: false,
+                message: 'Test is not running',
+                status: progress.status
+            });
+        }
+        
+        // Mark as cancelled
+        progress.status = 'cancelled';
+        progress.endTime = Date.now();
+        progress.cancelledBy = req.user || 'unknown';
+        activeTests.set(testId, progress);
+        
+        // Note: In a real implementation, you'd need to actually stop the test
+        console.log(`⏹️  Test ${testId} cancelled by user`);
+        
+        res.json({
+            success: true,
+            message: 'Test cancelled',
+            testId: testId
+        });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// ==================== EXPORT ENDPOINTS ====================
+
+// Quick export (simple CSV of recent runs)
+app.get('/api/export/quick', basicAuth, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        const runs = await db.getRecentRuns(limit);
+        
+        // Create CSV headers
+        const csvHeaders = [
+            'ID', 
+            'Timestamp', 
+            'Total Tests', 
+            'Passed', 
+            'Failed', 
+            'Success Rate', 
+            'Duration (ms)', 
+            'Triggered By'
+        ];
+        
+        // Create CSV rows
+        const csvRows = runs.map(run => [
+            run.id,
+            run.timestamp,
+            run.total_tests || 0,
+            run.passed_tests || 0,
+            run.failed_tests || 0,
+            `${run.success_rate || 0}%`,
+            run.duration_ms || 0,
+            run.triggered_by || 'scheduled'
+        ]);
+        
+        // Combine headers and rows
+        const csvContent = [
+            csvHeaders.join(','),
+            ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+        
+        const filename = `monitoring-export-${new Date().toISOString().split('T')[0]}.csv`;
+        
+        // Set response headers for CSV download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(csvContent);
+        
+    } catch (error) {
+        console.error('Quick export error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+// Main export endpoint with filtering
+app.get('/api/export', basicAuth, async (req, res) => {
+    
+    try {
+        const { 
+            startDate, 
+            endDate, 
+            format = 'csv',
+            includeTests = 'false'
+        } = req.query;
+        
+        console.log(`Export request: ${startDate} to ${endDate}, format: ${format}`);
+        
+        // Validate and parse dates
+        const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default: 30 days
+        const end = endDate ? new Date(endDate) : new Date();
+        
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Invalid date format. Please use YYYY-MM-DD' 
+            });
+        }
+        
+        // Get all runs (we'll filter them)
+        const allRuns = await db.getRecentRuns(10000); // Large limit
+        
+        // Filter runs by date
+        const filteredRuns = allRuns.filter(run => {
+            if (!run.timestamp) return false;
+            const runDate = new Date(run.timestamp);
+            return runDate >= start && runDate <= end;
+        });
+        
+        console.log(`Found ${filteredRuns.length} runs in date range`);
+        
+        if (filteredRuns.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No data found for the specified date range'
+            });
+        }
+        
+        // Handle different export formats
+        switch (format.toLowerCase()) {
+            case 'json':
+                return exportAsJSON(filteredRuns, start, end, res);
+            case 'csv':
+            default:
+                return exportAsCSV(filteredRuns, start, end, res);
+        }
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Export failed', 
+            details: error.message 
+        });
+    }
+
+});
+
+// Export formats endpoint (for frontend to know what's available)
+app.get('/api/export/formats', basicAuth, (req, res) => {
+    res.json({
+        success: true,
+        formats: [
+            { 
+                id: 'csv', 
+                name: 'CSV', 
+                description: 'Comma-separated values (Excel compatible)',
+                extensions: ['.csv'],
+                default: true
+            },
+            { 
+                id: 'json', 
+                name: 'JSON', 
+                description: 'Complete data in JSON format',
+                extensions: ['.json'],
+                default: false
+            }
+        ],
+        options: {
+            dateRange: {
+                defaultStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                defaultEnd: new Date().toISOString().split('T')[0],
+                format: 'YYYY-MM-DD'
+            },
+            filters: {
+                includeTests: {
+                    available: true,
+                    default: false,
+                    description: 'Include individual test details (slower for large exports)'
+                }
+            }
+        }
+    });
+});
+
+// JSON Export function
+async function exportAsJSON(runs, startDate, endDate, res) {
+    try {
+        // Create comprehensive JSON data
+        const exportData = {
+            metadata: {
+                exportDate: new Date().toISOString(),
+                dateRange: {
+                    start: startDate.toISOString().split('T')[0],
+                    end: endDate.toISOString().split('T')[0]
+                },
+                totalRuns: runs.length,
+                format: 'JSON Export'
+            },
+            summary: {
+                totalRuns: runs.length,
+                totalTests: runs.reduce((sum, run) => sum + (run.total_tests || 0), 0),
+                passedTests: runs.reduce((sum, run) => sum + (run.passed_tests || 0), 0),
+                failedTests: runs.reduce((sum, run) => sum + (run.failed_tests || 0), 0),
+                averageSuccessRate: runs.length > 0 
+                    ? (runs.reduce((sum, run) => sum + (run.success_rate || 0), 0) / runs.length).toFixed(2)
+                    : 0
+            },
+            testRuns: runs
+        };
+        
+        // Get individual tests if requested and runs are not too many
+        if (runs.length <= 100) { // Limit to avoid overwhelming
+            exportData.individualTests = [];
+            
+            for (const run of runs.slice(0, 50)) { // Further limit to 50 runs
+                try {
+                    const runDetails = await db.getRunDetails(run.id);
+                    if (runDetails && runDetails.tests) {
+                        runDetails.tests.forEach(test => {
+                            exportData.individualTests.push({
+                                runId: run.id,
+                                runTimestamp: run.timestamp,
+                                ...test
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.warn(`Failed to get details for run ${run.id}:`, error.message);
+                }
+            }
+        }
+        
+        // Get incidents if any
+        try {
+            const incidents = await db.getIncidents('all');
+            if (incidents && incidents.length > 0) {
+                exportData.incidents = incidents;
+            }
+        } catch (error) {
+            console.warn('Failed to get incidents:', error.message);
+        }
+        
+        const filename = `monitoring-export-${new Date().toISOString().split('T')[0]}.json`;
+        
+        // Set response headers for JSON download
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(JSON.stringify(exportData, null, 2));
+        
+    } catch (error) {
+        console.error('JSON export error:', error);
+        throw error;
+    }
+}
+
+// CSV Export function
+function exportAsCSV(runs, startDate, endDate, res) {
+    try {
+        // Create CSV headers
+        const csvHeaders = [
+            'ID', 
+            'Timestamp', 
+            'Date',
+            'Time',
+            'Total Tests', 
+            'Passed', 
+            'Failed', 
+            'Success Rate', 
+            'Duration (ms)', 
+            'Triggered By'
+        ];
+        
+        // Create CSV rows
+        const csvRows = runs.map(run => {
+            const runDate = new Date(run.timestamp);
+            return [
+                run.id,
+                run.timestamp,
+                runDate.toISOString().split('T')[0], // Date part
+                runDate.toTimeString().split(' ')[0], // Time part
+                run.total_tests || 0,
+                run.passed_tests || 0,
+                run.failed_tests || 0,
+                `${run.success_rate || 0}%`,
+                run.duration_ms || 0,
+                run.triggered_by || 'scheduled'
+            ];
+        });
+        
+        // Combine headers and rows (escape commas in values)
+        const csvContent = [
+            csvHeaders.join(','),
+            ...csvRows.map(row => row.map(cell => 
+                typeof cell === 'string' && cell.includes(',') 
+                    ? `"${cell}"` 
+                    : cell
+            ).join(','))
+        ].join('\n');
+        
+        const filename = `monitoring-export-${startDate.toISOString().split('T')[0]}-to-${endDate.toISOString().split('T')[0]}.csv`;
+        
+        // Set response headers for CSV download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(csvContent);
+        
+    } catch (error) {
+        console.error('CSV export error:', error);
+        throw error;
+    }
+}
+
+
+
+
+// Dashboard home page
+app.get('*', basicAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
+// ==================== Helper functions ====================
+function cleanUpOldTests() {
+    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    
+    for (const [testId, progress] of activeTests.entries()) {
+        if (progress.startTime < oneHourAgo) {
+            activeTests.delete(testId);
+            console.log(`🧹 Auto-cleaned old test: ${testId}`);
+        }
+    }
+}
+
+function estimateRemainingTime(progress) {
+    if (!progress.startTime || progress.progress === 0) return null;
+    
+    const elapsed = Date.now() - progress.startTime;
+    const estimatedTotal = (elapsed / progress.progress) * 100;
+    return Math.max(0, estimatedTotal - elapsed);
+}
 
 // Function to run tests with progress tracking
 async function runEnhancedTests(testId, progress) {
@@ -339,102 +720,6 @@ async function runEnhancedTests(testId, progress) {
         }
     }
 }
-
-// Get test progress
-app.get('/api/test-progress/:testId', basicAuth, async (req, res) => {
-    try {
-        
-        const testId = req.params.testId;
-        const progress = activeTests.get(testId);
-        
-        //console.log ( "📊 Getting progress for test:", testId, progress );
-
-       if (!progress) {
-            return res.status(404).json({
-                success: false,
-                error: 'Test not found or expired',
-                testId: testId
-            });
-        }
-        
-        res.json({
-            success: true,
-            ...progress,
-            estimatedTimeRemaining: progress.status === 'running' 
-                ? estimateRemainingTime(progress) 
-                : 0
-        });
-        
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Cancel a running test
-app.post('/api/cancel-test/:testId', basicAuth, async (req, res) => {
-    try {
-        const testId = req.params.testId;
-        const progress = activeTests.get(testId);
-        
-        if (!progress) {
-            return res.status(404).json({
-                success: false,
-                error: 'Test not found'
-            });
-        }
-        
-        if (progress.status !== 'running') {
-            return res.json({
-                success: false,
-                message: 'Test is not running',
-                status: progress.status
-            });
-        }
-        
-        // Mark as cancelled
-        progress.status = 'cancelled';
-        progress.endTime = Date.now();
-        progress.cancelledBy = req.user || 'unknown';
-        activeTests.set(testId, progress);
-        
-        // Note: In a real implementation, you'd need to actually stop the test
-        console.log(`⏹️  Test ${testId} cancelled by user`);
-        
-        res.json({
-            success: true,
-            message: 'Test cancelled',
-            testId: testId
-        });
-        
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Helper functions
-function cleanUpOldTests() {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    
-    for (const [testId, progress] of activeTests.entries()) {
-        if (progress.startTime < oneHourAgo) {
-            activeTests.delete(testId);
-            console.log(`🧹 Auto-cleaned old test: ${testId}`);
-        }
-    }
-}
-
-function estimateRemainingTime(progress) {
-    if (!progress.startTime || progress.progress === 0) return null;
-    
-    const elapsed = Date.now() - progress.startTime;
-    const estimatedTotal = (elapsed / progress.progress) * 100;
-    return Math.max(0, estimatedTotal - elapsed);
-}
-
-// Dashboard home page
-app.get('*', basicAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 // Start server
 app.listen(PORT, () => {

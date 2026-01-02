@@ -498,19 +498,254 @@ async function loadDatabaseInfo() {
     }
 }
 
-function exportData() {
-    const startDate = prompt('Enter start date (YYYY-MM-DD):', 
-        new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]);
-    if (!startDate) return;
+async function exportData() {
+    // Show export dialog
+    const exportDialog = `
+        <div class="export-dialog" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        ">
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                width: 400px;
+                max-width: 90%;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            ">
+                <h3 style="margin-top: 0; color: #333;">Export Monitoring Data</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Start Date:</label>
+                    <input type="date" id="export-start" style="
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                    " value="${new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]}">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">End Date:</label>
+                    <input type="date" id="export-end" style="
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                    " value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Format:</label>
+                    <select id="export-format" style="
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                    ">
+                        <option value="csv">CSV (Excel compatible)</option>
+                        <option value="json">JSON (Complete data)</option>
+                    </select>
+                </div>
+                
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 25px;
+                    gap: 10px;
+                ">
+                    <button onclick="closeExportDialog()" style="
+                        padding: 10px 20px;
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        flex: 1;
+                    ">Cancel</button>
+                    
+                    <button onclick="submitExport()" style="
+                        padding: 10px 20px;
+                        background: #28a745;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        flex: 1;
+                    ">Export</button>
+                </div>
+            </div>
+        </div>
+    `;
     
-    const endDate = prompt('Enter end date (YYYY-MM-DD):', 
-        new Date().toISOString().split('T')[0]);
-    if (!endDate) return;
+    // Remove existing dialog if any
+    const existingDialog = document.querySelector('.export-dialog');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
     
-    // Create download link for filtered data
-    const url = `/api/export?start=${startDate}&end=${endDate}`;
-    window.open(url, '_blank');
+    // Add new dialog
+    document.body.insertAdjacentHTML('beforeend', exportDialog);
 }
+
+function closeExportDialog() {
+    const dialog = document.querySelector('.export-dialog');
+    if (dialog) {
+        dialog.remove();
+    }
+}
+
+function submitExport() {
+    const startDate = document.getElementById('export-start').value;
+    const endDate = document.getElementById('export-end').value;
+    const format = document.getElementById('export-format').value;
+    
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    // Build export URL
+    const params = new URLSearchParams({
+        startDate,
+        endDate,
+        format
+    });
+    
+    const url = `/api/export?${params.toString()}`;
+    
+    // Show loading message
+    const loadingMsg = document.createElement('div');
+    loadingMsg.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #17a2b8;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        ">
+            <div class="spinner" style="
+                width: 20px;
+                height: 20px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            "></div>
+            <span>Preparing export...</span>
+        </div>
+    `;
+    document.body.appendChild(loadingMsg);
+    
+    // Add spinner animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Open export in new tab (triggers download)
+    const exportWindow = window.open(url, '_blank');
+    
+    // Close dialog
+    closeExportDialog();
+    
+    // Remove loading message after 3 seconds
+    setTimeout(() => {
+        if (loadingMsg.parentNode) {
+            loadingMsg.remove();
+        }
+        style.remove();
+        
+        // Show success message if window opened successfully
+        if (exportWindow) {
+            showSuccess('Export started. Check your downloads.');
+        }
+    }, 3000);
+}
+
+// Quick export function
+function quickExport() {
+    const url = '/api/export/quick?limit=1000';
+    window.open(url, '_blank');
+    showSuccess('Quick export started. Check your downloads.');
+}
+
+// Update your export button (if it exists)
+const exportButton = document.querySelector('.action-btn.success');
+if (exportButton && exportButton.textContent.includes('Export')) {
+    exportButton.onclick = exportData;
+}
+
+// Helper function to show success messages
+function showSuccess(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        ">
+            <i class="fas fa-check-circle" style="font-size: 18px;"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+        style.remove();
+    }, 5000);
+}
+
 
 function viewLogs() {
     // Open logs directory or display logs
