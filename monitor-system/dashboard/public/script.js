@@ -789,6 +789,85 @@ window.onclick = function(event) {
     }
 }
 
+// Cleanup management functions
+async function runCleanup() {
+    if (confirm('Run cleanup now? This will delete old log files, reports, and screenshots based on your retention policy.')) {
+        try {
+            const response = await fetch('/api/cleanup/run');
+            const result = await response.json();
+            
+            if (result.success) {
+                showSuccess(`Cleanup completed! Deleted ${result.logs?.deleted || 0} logs and ${result.reports?.deleted || 0} reports. Freed ${formatBytes(result.totalFreed || 0)}.`);
+                
+                // Refresh disk usage display
+                loadCleanupStats();
+            } else {
+                showError(`Cleanup failed: ${result.error}`);
+            }
+            
+        } catch (error) {
+            showError('Failed to run cleanup: ' + error.message);
+        }
+    }
+}
+
+async function loadCleanupStats() {
+    try {
+        const response = await fetch('/api/cleanup/stats');
+        const stats = await response.json();
+        
+        if (stats.success) {
+            updateCleanupDisplay(stats);
+        }
+        
+    } catch (error) {
+        console.error('Failed to load cleanup stats:', error);
+    }
+}
+
+function updateCleanupDisplay(stats) {
+    // Update disk usage display
+    if (stats.diskUsage) {
+        const totalElement = document.getElementById('disk-usage-total');
+        if (totalElement) {
+            totalElement.textContent = stats.diskUsage.directories 
+                ? `${stats.diskUsage.directories.logs?.formatted || '0'} logs, ${stats.diskUsage.directories.reports?.formatted || '0'} reports`
+                : 'Calculating...';
+        }
+        
+        // Update old files count
+        const oldFilesElement = document.getElementById('old-files-count');
+        if (oldFilesElement && stats.diskUsage.oldFiles !== undefined) {
+            oldFilesElement.textContent = stats.diskUsage.oldFiles;
+            oldFilesElement.className = stats.diskUsage.oldFiles > 0 ? 'warning' : 'success';
+        }
+        
+        // Update cleanup status
+        const cleanupStatus = document.getElementById('cleanup-status');
+        if (cleanupStatus) {
+            if (stats.canCleanup) {
+                cleanupStatus.textContent = 'ACTIVE';
+                cleanupStatus.className = 'status-active';
+                cleanupStatus.title = `Retention: ${stats.config.retentionDays} days`;
+            } else {
+                cleanupStatus.textContent = 'DISABLED';
+                cleanupStatus.className = 'status-disabled';
+            }
+        }
+    }
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Add to your initialization
+loadCleanupStats();
+
 // Period selector change
 document.getElementById('uptime-period').addEventListener('change', loadUptimeStats);
 

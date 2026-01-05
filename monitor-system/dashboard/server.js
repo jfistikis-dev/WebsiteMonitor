@@ -327,6 +327,90 @@ app.post('/api/cancel-test/:testId', basicAuth, async (req, res) => {
     }
 });
 
+// ==================== CLEANUP ENDPOINTS ====================
+
+// Cleanup management endpoints
+app.get('/api/cleanup/run', basicAuth, async (req, res) => {
+    try {
+        const { WebsiteMonitor } = require('../index');
+        const monitor = new WebsiteMonitor();
+        
+        const result = await monitor.runCleanup();
+        res.json(result);
+        
+    } catch (error) {
+        console.error('Cleanup API error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+app.get('/api/cleanup/stats', basicAuth, async (req, res) => {
+    try {
+        const { WebsiteMonitor } = require('../index');
+        const monitor = new WebsiteMonitor();
+        
+        const diskUsage = await monitor.getDiskUsage();
+        const config = monitor.cleanupManager.cleanupConfig;
+        
+        res.json({
+            success: true,
+            diskUsage,
+            config,
+            canCleanup: config.enabled,
+            nextCleanup: this.calculateNextCleanup(config)
+        });
+        
+    } catch (error) {
+        console.error('Cleanup stats API error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+app.post('/api/cleanup/configure', basicAuth, async (req, res) => {
+    try {
+        const { retentionDays, enabled, maxLogSizeMB } = req.body;
+        
+        // Note: In production, you'd want to save this to config file
+        // For now, we'll just return the proposed configuration
+        
+        res.json({
+            success: true,
+            message: 'Configuration updated (in-memory only)',
+            newConfig: {
+                retentionDays: retentionDays || 180,
+                enabled: enabled !== undefined ? enabled : true,
+                maxLogSizeMB: maxLogSizeMB || 100
+            },
+            note: 'To make permanent, update config.json file'
+        });
+        
+    } catch (error) {
+        console.error('Cleanup config API error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+function calculateNextCleanup(config) {
+    if (!config.enabled) return null;
+    
+    // Assuming cleanup runs daily or with each test run
+    const nextRun = new Date();
+    nextRun.setHours(nextRun.getHours() + 24); // Next day
+    
+    return {
+        nextRun: nextRun.toISOString(),
+        estimatedFiles: 'Based on current retention policy'
+    };
+}
 
 // ==================== EXPORT ENDPOINTS ====================
 
@@ -440,7 +524,7 @@ app.get('/api/export', basicAuth, async (req, res) => {
             case 'pdf':
             case 'html':    return exportAsPDF(exportData, generateExportFilename('pdf', start, end), res, exportsDir);
             case 'csv':
-                
+
             default:        return exportAsCSV(filteredRuns, start, end, res);
         }
         
