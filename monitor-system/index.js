@@ -23,6 +23,10 @@ class WebsiteMonitor {
         this.logger = this.setupLogger();
         this.db = new Database();
         this.testRegistry = require('./tests'); // Load test registry
+
+        // Add cleanup manager
+        this.cleanupManager = new CleanupManager(config);
+        this.cleanupManager.setLogger(this.logger);
     }
 
     setupLogger() {
@@ -60,6 +64,12 @@ class WebsiteMonitor {
         const startTime = Date.now();
 
         try {
+            
+            // Run cleanup before tests (optional)
+            if (config.monitoring?.cleanup?.runBeforeTests) {
+                await this.runCleanup();
+            }
+            
             // Get all registered tests in sequence
             const testInstances = this.testRegistry.getTests(config, this.logger);
             
@@ -97,6 +107,9 @@ class WebsiteMonitor {
             
             // Process results
             await this.processResults();
+
+            // Run cleanup after tests
+            await this.runCleanup();
             
         } catch (error) {
             this.logger.error(`Fatal error in test execution: ${error.message}`);
@@ -275,14 +288,34 @@ class WebsiteMonitor {
     
     }
 
-    cleanup() {
+     async runCleanup() {
         try {
-            this.logger.close();
-            this.db.close();
-            this.logger.info('Monitor cleanup completed');
+            this.logger.info('Running cleanup of old files...');
+            const cleanupResult = await this.cleanupManager.performCleanup();
+            
+            if (cleanupResult.success) {
+                this.logger.info(`Cleanup completed: ${cleanupResult.logs.deleted} logs, ${cleanupResult.reports.deleted} reports deleted`);
+                
+                // Add cleanup info to results
+                this.results.cleanup = {
+                    performed: true,
+                    timestamp: new Date().toISOString(),
+                    ...cleanupResult
+                };
+            } else {
+                this.logger.warn(`Cleanup failed: ${cleanupResult.error}`);
+            }
+            
+            return cleanupResult;
+            
         } catch (error) {
-            console.error('Cleanup error:', error);
+            this.logger.error(`Cleanup error: ${error.message}`);
+            return { success: false, error: error.message };
         }
+    }
+
+    async getDiskUsage() {
+        return await this.cleanupManager.getDiskUsage();
     }
 }
 
@@ -307,7 +340,15 @@ async function main() {
         console.error(`Fatal error: ${error.message}`);
         process.exit(1);
     } finally {
-        monitor.cleanup();
+        
+        // close everything... 
+        try {
+            this.logger.close();
+            this.db.close();
+            this.logger.info('Monitor cleanup completed');
+        } catch (error) {
+            console.error('Cleanup error:', error);
+        }
     }
 }
 
