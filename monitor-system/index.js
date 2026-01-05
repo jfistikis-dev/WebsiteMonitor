@@ -5,6 +5,7 @@ const Database = require('./database');
 // Load configuration
 const configPath = path.join(__dirname, '../monitor-system/config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const CleanupManager = require('./utils/cleanup');
 
 class WebsiteMonitor {
     
@@ -12,6 +13,7 @@ class WebsiteMonitor {
     results         = null;
     logger          = null;
     testRegistry    = null;
+    cleanupManager  = null;
     
     constructor() {
         this.results = {

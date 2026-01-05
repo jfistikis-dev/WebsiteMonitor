@@ -348,6 +348,7 @@ app.get('/api/cleanup/run', basicAuth, async (req, res) => {
 });
 
 app.get('/api/cleanup/stats', basicAuth, async (req, res) => {
+   
     try {
         const { WebsiteMonitor } = require('../index');
         const monitor = new WebsiteMonitor();
@@ -360,7 +361,7 @@ app.get('/api/cleanup/stats', basicAuth, async (req, res) => {
             diskUsage,
             config,
             canCleanup: config.enabled,
-            nextCleanup: this.calculateNextCleanup(config)
+            nextCleanup: calculateNextCleanup(config)
         });
         
     } catch (error) {
@@ -961,9 +962,7 @@ function formatMetricName(key) {
         .trim();
 }
 
-// PDF Export (simplified - returns HTML that can be printed as PDF)
 // PDF Export (returns HTML that can be printed as PDF)
-
 async function exportAsPDF(data, filename, res, exportsDir) {
     try {
         // Generate HTML report

@@ -450,3 +450,102 @@ canvas {
 }
 .mt-n1 {margin-top: -5px;}
 .mt-n2 {margin-top: -15px;}
+
+/* Cleanup/Card Styles */
+.storage-info {
+    margin-bottom: 20px;
+}
+
+.storage-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.storage-item:last-child {
+    border-bottom: none;
+}
+
+.storage-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.storage-value {
+    font-weight: 600;
+    color: #28a745;
+}
+
+.storage-value.warning {
+    color: #ffc107;
+}
+
+.storage-value.error {
+    color: #dc3545;
+}
+
+.cleanup-actions {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.btn-cleanup {
+    flex: 1;
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.2s;
+}
+
+.btn-cleanup:hover {
+    transform: translateY(-2px);
+}
+
+.cleanup-note {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #17a2b8;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.status-active {
+    background: #28a745;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.status-disabled {
+    background: #6c757d;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.status-warning {
+    background: #ffc107;
+    color: #212529;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.text-sup {
+    font-size: 12px;
+    color: #6c757d;
+    vertical-align: super;
+}

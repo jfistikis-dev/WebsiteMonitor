@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     loadAllData();
     
+
+    
     // Auto-refresh every 30 seconds
     autoRefreshInterval = setInterval(loadAllData, 30000);
 });
@@ -60,6 +62,7 @@ async function loadAllData() {
             loadIncidents(),
             loadDatabaseInfo(),
             nextRunTime(),
+            loadCleanupStats()
         ]);
         
         updateLastUpdateTime();
@@ -830,8 +833,8 @@ function updateCleanupDisplay(stats) {
     if (stats.diskUsage) {
         const totalElement = document.getElementById('disk-usage-total');
         if (totalElement) {
-            totalElement.textContent = stats.diskUsage.directories 
-                ? `${stats.diskUsage.directories.logs?.formatted || '0'} logs, ${stats.diskUsage.directories.reports?.formatted || '0'} reports`
+            totalElement.innerHTML  = stats.diskUsage.directories 
+                ? `${stats.diskUsage.directories.logs?.formatted || '0'} <span class="text-sup">logs</span>, ${stats.diskUsage.directories.reports?.formatted || '0'} <span class="text-sup">reports</span>`
                 : 'Calculating...';
         }
         
@@ -864,9 +867,6 @@ function formatBytes(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
-// Add to your initialization
-loadCleanupStats();
 
 // Period selector change
 document.getElementById('uptime-period').addEventListener('change', loadUptimeStats);

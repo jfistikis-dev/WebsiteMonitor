@@ -153,6 +153,47 @@
                     </div>
                 </div>
 
+
+                                <!-- Add to System Information card or create new card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-trash-alt"></i> Storage Management</h2>
+                        <span class="status-badge" id="cleanup-status">LOADING</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="storage-info">
+                            <div class="storage-item">
+                                <span class="storage-label">Disk Usage:</span>
+                                <span class="storage-value" id="disk-usage-total">Calculating...</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-label">Old Files (>6 months):</span>
+                                <span class="storage-value" id="old-files-count">--</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-label">Retention Policy:</span>
+                                <span class="storage-value" id="retention-days">180 days</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cleanup-actions">
+                            <button class="btn-cleanup" onclick="runCleanup()">
+                                <i class="fas fa-broom"></i> Run Cleanup Now
+                            </button>
+                            <button class="btn-refresh" onclick="loadCleanupStats()">
+                                <i class="fas fa-sync"></i> Refresh Stats
+                            </button>
+                        </div>
+                        
+                        <div class="cleanup-note">
+                            <small>
+                                <i class="fas fa-info-circle"></i>
+                                Cleanup automatically runs after each test and removes files older than retention period.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Quick Actions -->
                 <div class="card">
                     <div class="card-header">
@@ -177,6 +218,7 @@
                     </div>
                 </div>
 
+               
                 <!-- Open Incidents -->
                 <div class="card">
                     <div class="card-header">
