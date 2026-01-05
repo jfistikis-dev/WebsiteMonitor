@@ -3,6 +3,7 @@ console.log('=== SERVER STARTING - VERSION: ' + Date.now() + ' ===');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const ExcelJS = require('exceljs');
 
 const { formatUptimeForDashboard, formatDuration } = require('../utils/time-formatter');
 
@@ -19,6 +20,13 @@ let db = new Database();
 
 const app = express();
 const PORT = config.dashboard.port || 3000;
+
+// Create exports directory
+const exportsDir = path.join(__dirname, '../exports');
+if (!fs.existsSync(exportsDir)) {
+    fs.mkdirSync(exportsDir, { recursive: true });
+    console.log(`📁 Created exports directory: ${exportsDir}`);
+}
 
 // Middleware
 app.use(express.json());
@@ -382,13 +390,14 @@ app.get('/api/export', basicAuth, async (req, res) => {
             startDate, 
             endDate, 
             format = 'csv',
-            includeTests = 'false'
+            includeTests = 'false',
+            includeDetails = 'false'
         } = req.query;
         
         console.log(`Export request: ${startDate} to ${endDate}, format: ${format}`);
         
         // Validate and parse dates
-        const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default: 30 days
+        const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const end = endDate ? new Date(endDate) : new Date();
         
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -398,8 +407,8 @@ app.get('/api/export', basicAuth, async (req, res) => {
             });
         }
         
-        // Get all runs (we'll filter them)
-        const allRuns = await db.getRecentRuns(10000); // Large limit
+        // Get all runs
+        const allRuns = await db.getRecentRuns(10000);
         
         // Filter runs by date
         const filteredRuns = allRuns.filter(run => {
@@ -417,13 +426,22 @@ app.get('/api/export', basicAuth, async (req, res) => {
             });
         }
         
+        
+        // Prepare export data
+        const exportData = await prepareExportData(filteredRuns, start, end, includeDetails === 'true');
+        
         // Handle different export formats
         switch (format.toLowerCase()) {
-            case 'json':
-                return exportAsJSON(filteredRuns, start, end, res);
+            case 'json':    return exportAsJSON(exportData, start, end, res);
+
+            case 'excel':
+            case 'xlsx':    return exportAsExcel(exportData, generateExportFilename('excel', start, end), res, exportsDir);
+
+            case 'pdf':
+            case 'html':    return exportAsPDF(exportData, generateExportFilename('pdf', start, end), res, exportsDir);
             case 'csv':
-            default:
-                return exportAsCSV(filteredRuns, start, end, res);
+                
+            default:        return exportAsCSV(filteredRuns, start, end, res);
         }
         
     } catch (error) {
@@ -434,7 +452,6 @@ app.get('/api/export', basicAuth, async (req, res) => {
             details: error.message 
         });
     }
-
 });
 
 // Export formats endpoint (for frontend to know what's available)
@@ -447,14 +464,32 @@ app.get('/api/export/formats', basicAuth, (req, res) => {
                 name: 'CSV', 
                 description: 'Comma-separated values (Excel compatible)',
                 extensions: ['.csv'],
-                default: true
+                default: true,
+                supportsDetails: false
             },
             { 
                 id: 'json', 
                 name: 'JSON', 
                 description: 'Complete data in JSON format',
                 extensions: ['.json'],
-                default: false
+                default: false,
+                supportsDetails: true
+            },
+            { 
+                id: 'excel', 
+                name: 'Excel', 
+                description: 'Microsoft Excel format with multiple sheets',
+                extensions: ['.xlsx'],
+                default: false,
+                supportsDetails: true
+            },
+            { 
+                id: 'pdf', 
+                name: 'PDF Report', 
+                description: 'Printable HTML report (save as PDF)',
+                extensions: ['.html'],
+                default: false,
+                supportsDetails: false
             }
         ],
         options: {
@@ -464,73 +499,119 @@ app.get('/api/export/formats', basicAuth, (req, res) => {
                 format: 'YYYY-MM-DD'
             },
             filters: {
-                includeTests: {
+                includeDetails: {
                     available: true,
                     default: false,
-                    description: 'Include individual test details (slower for large exports)'
+                    description: 'Include individual test details (for JSON and Excel formats only)'
                 }
             }
         }
     });
 });
 
+// Helper function to generate export filename
+function generateExportFilename(format, startDate, endDate) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const dateRange = `${startDate.toISOString().split('T')[0]}_to_${endDate.toISOString().split('T')[0]}`;
+    return `monitoring-${dateRange}-${timestamp}`;
+}
+// Helper function to prepare comprehensive export data
+async function prepareExportData(runs, startDate, endDate, includeDetails = false) {
+    // Get incidents
+    let incidents = [];
+    try {
+        incidents = await db.getIncidents('all');
+    } catch (error) {
+        console.warn('Failed to get incidents:', error.message);
+    }
+    
+    // Calculate daily statistics
+    const dailyStats = {};
+    runs.forEach(run => {
+        const date = new Date(run.timestamp).toISOString().split('T')[0];
+        if (!dailyStats[date]) {
+            dailyStats[date] = {
+                runs: 0,
+                totalTests: 0,
+                passedTests: 0,
+                failedTests: 0
+            };
+        }
+        
+        dailyStats[date].runs++;
+        dailyStats[date].totalTests += run.total_tests || 0;
+        dailyStats[date].passedTests += run.passed_tests || 0;
+        dailyStats[date].failedTests += run.failed_tests || 0;
+    });
+    
+    // Convert to array
+    const dailyStatsArray = Object.entries(dailyStats).map(([date, stats]) => ({
+        date,
+        ...stats
+    })).sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Calculate overall statistics
+    const totalTests = runs.reduce((sum, run) => sum + (run.total_tests || 0), 0);
+    const passedTests = runs.reduce((sum, run) => sum + (run.passed_tests || 0), 0);
+    const failedTests = runs.reduce((sum, run) => sum + (run.failed_tests || 0), 0);
+    const successRate = totalTests > 0 ? (passedTests / totalTests * 100).toFixed(2) : 0;
+    
+    // Get individual test details if requested and runs are not too many
+    let individualTests = [];
+    if (includeDetails && runs.length <= 50) {
+        for (const run of runs.slice(0, 20)) { // Limit to 20 runs for performance
+            try {
+                const runDetails = await db.getRunDetails(run.id);
+                if (runDetails && runDetails.tests) {
+                    runDetails.tests.forEach(test => {
+                        individualTests.push({
+                            runId: run.id,
+                            runTimestamp: run.timestamp,
+                            ...test
+                        });
+                    });
+                }
+            } catch (error) {
+                console.warn(`Failed to get details for run ${run.id}:`, error.message);
+            }
+        }
+    }
+    
+    return {
+        metadata: {
+            exportDate: new Date().toISOString(),
+            dateRange: {
+                start: startDate.toISOString().split('T')[0],
+                end: endDate.toISOString().split('T')[0]
+            },
+            totalRuns: runs.length,
+            format: 'Comprehensive Export'
+        },
+        summary: {
+            totalRuns: runs.length,
+            totalTests: totalTests,
+            passedTests: passedTests,
+            failedTests: failedTests,
+            successRate: parseFloat(successRate),
+            averageDuration: runs.length > 0 
+                ? Math.round(runs.reduce((sum, run) => sum + (run.duration_ms || 0), 0) / runs.length)
+                : 0
+        },
+        statistics: {
+            daily: dailyStatsArray
+        },
+        testRuns: runs,
+        incidents: incidents,
+        individualTests: individualTests
+    };
+}
+
+
 // JSON Export function
 async function exportAsJSON(runs, startDate, endDate, res) {
     try {
-        // Create comprehensive JSON data
-        const exportData = {
-            metadata: {
-                exportDate: new Date().toISOString(),
-                dateRange: {
-                    start: startDate.toISOString().split('T')[0],
-                    end: endDate.toISOString().split('T')[0]
-                },
-                totalRuns: runs.length,
-                format: 'JSON Export'
-            },
-            summary: {
-                totalRuns: runs.length,
-                totalTests: runs.reduce((sum, run) => sum + (run.total_tests || 0), 0),
-                passedTests: runs.reduce((sum, run) => sum + (run.passed_tests || 0), 0),
-                failedTests: runs.reduce((sum, run) => sum + (run.failed_tests || 0), 0),
-                averageSuccessRate: runs.length > 0 
-                    ? (runs.reduce((sum, run) => sum + (run.success_rate || 0), 0) / runs.length).toFixed(2)
-                    : 0
-            },
-            testRuns: runs
-        };
-        
-        // Get individual tests if requested and runs are not too many
-        if (runs.length <= 100) { // Limit to avoid overwhelming
-            exportData.individualTests = [];
-            
-            for (const run of runs.slice(0, 50)) { // Further limit to 50 runs
-                try {
-                    const runDetails = await db.getRunDetails(run.id);
-                    if (runDetails && runDetails.tests) {
-                        runDetails.tests.forEach(test => {
-                            exportData.individualTests.push({
-                                runId: run.id,
-                                runTimestamp: run.timestamp,
-                                ...test
-                            });
-                        });
-                    }
-                } catch (error) {
-                    console.warn(`Failed to get details for run ${run.id}:`, error.message);
-                }
-            }
-        }
-        
-        // Get incidents if any
-        try {
-            const incidents = await db.getIncidents('all');
-            if (incidents && incidents.length > 0) {
-                exportData.incidents = incidents;
-            }
-        } catch (error) {
-            console.warn('Failed to get incidents:', error.message);
-        }
+        // Get comprehensive data
+        const exportData = await prepareExportData(runs, startDate, endDate, false);
         
         const filename = `monitoring-export-${new Date().toISOString().split('T')[0]}.json`;
         
@@ -602,6 +683,393 @@ function exportAsCSV(runs, startDate, endDate, res) {
     }
 }
 
+async function exportAsExcel(data, filename, res, exportsDir) {
+    try {
+        const workbook = new ExcelJS.Workbook();
+        workbook.created = new Date();
+        workbook.modified = new Date();
+        
+        // Add metadata sheet
+        const metaSheet = workbook.addWorksheet('Metadata');
+        metaSheet.columns = [
+            { header: 'Property', key: 'property', width: 25 },
+            { header: 'Value', key: 'value', width: 40 }
+        ];
+        
+        // Add metadata
+        metaSheet.addRow({ property: 'Export Date', value: data.metadata.exportDate });
+        metaSheet.addRow({ property: 'Date Range', value: `${data.metadata.dateRange.start} to ${data.metadata.dateRange.end}` });
+        metaSheet.addRow({ property: 'Total Runs', value: data.metadata.totalRuns });
+        metaSheet.addRow({ property: 'Format', value: data.metadata.format });
+        
+        // Style header row
+        metaSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        metaSheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF0070C0' }
+        };
+        
+        // Add summary sheet
+        const summarySheet = workbook.addWorksheet('Summary');
+        summarySheet.columns = [
+            { header: 'Metric', key: 'metric', width: 30 },
+            { header: 'Value', key: 'value', width: 25 }
+        ];
+        
+        Object.entries(data.summary).forEach(([key, value]) => {
+            summarySheet.addRow({ 
+                metric: formatMetricName(key), 
+                value: value 
+            });
+        });
+        
+        // Style summary sheet
+        summarySheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        summarySheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF00B050' }
+        };
+        
+        // Add test runs sheet
+        const runsSheet = workbook.addWorksheet('Test Runs');
+        runsSheet.columns = [
+            { header: 'ID', key: 'id', width: 10 },
+            { header: 'Date', key: 'date', width: 12 },
+            { header: 'Time', key: 'time', width: 10 },
+            { header: 'Total Tests', key: 'total_tests', width: 12 },
+            { header: 'Passed', key: 'passed_tests', width: 10 },
+            { header: 'Failed', key: 'failed_tests', width: 10 },
+            { header: 'Success Rate %', key: 'success_rate', width: 12 },
+            { header: 'Duration (ms)', key: 'duration_ms', width: 15 },
+            { header: 'Triggered By', key: 'triggered_by', width: 15 }
+        ];
+        
+        data.testRuns.forEach(run => {
+            const successRate = run.success_rate || 0;
+            runsSheet.addRow({
+                id: run.id,
+                date: new Date(run.timestamp).toISOString().split('T')[0],
+                time: new Date(run.timestamp).toTimeString().split(' ')[0],
+                total_tests: run.total_tests || 0,
+                passed_tests: run.passed_tests || 0,
+                failed_tests: run.failed_tests || 0,
+                success_rate: successRate,
+                duration_ms: run.duration_ms || 0,
+                triggered_by: run.triggered_by || 'scheduled'
+            });
+            
+            // Color code based on success rate
+            const row = runsSheet.lastRow;
+            if (successRate >= 90) {
+                row.getCell('success_rate').fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFC6EFCE' } // Light green
+                };
+            } else if (successRate < 70) {
+                row.getCell('success_rate').fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFFFC7CE' } // Light red
+                };
+            }
+        });
+        
+        runsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        runsSheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF7030A0' }
+        };
+        
+        // Add daily statistics sheet if available
+        if (data.statistics && data.statistics.daily && data.statistics.daily.length > 0) {
+            const statsSheet = workbook.addWorksheet('Daily Statistics');
+            statsSheet.columns = [
+                { header: 'Date', key: 'date', width: 12 },
+                { header: 'Runs', key: 'runs', width: 10 },
+                { header: 'Total Tests', key: 'totalTests', width: 12 },
+                { header: 'Passed', key: 'passed', width: 10 },
+                { header: 'Failed', key: 'failed', width: 10 },
+                { header: 'Success Rate %', key: 'successRate', width: 12 }
+            ];
+            
+            data.statistics.daily.forEach(day => {
+                const successRate = day.totalTests > 0 
+                    ? ((day.passedTests / day.totalTests) * 100).toFixed(2)
+                    : 0;
+                
+                statsSheet.addRow({
+                    date: day.date,
+                    runs: day.runs,
+                    totalTests: day.totalTests,
+                    passed: day.passedTests,
+                    failed: day.failedTests,
+                    successRate: parseFloat(successRate)
+                });
+            });
+            
+            statsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            statsSheet.getRow(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFC000' }
+            };
+        }
+        
+        // Add incidents sheet if available
+        if (data.incidents && data.incidents.length > 0) {
+            const incidentsSheet = workbook.addWorksheet('Incidents');
+            incidentsSheet.columns = [
+                { header: 'ID', key: 'id', width: 10 },
+                { header: 'Date', key: 'date', width: 12 },
+                { header: 'Title', key: 'title', width: 30 },
+                { header: 'Status', key: 'status', width: 12 },
+                { header: 'Severity', key: 'severity', width: 12 }
+            ];
+            
+            data.incidents.forEach(incident => {
+                incidentsSheet.addRow({
+                    id: incident.id,
+                    date: new Date(incident.created_at).toISOString().split('T')[0],
+                    title: incident.title,
+                    status: incident.status,
+                    severity: incident.severity || 'medium'
+                });
+            });
+            
+            incidentsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            incidentsSheet.getRow(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFF0000' }
+            };
+        }
+        
+        // Write to buffer
+        const buffer = await workbook.xlsx.writeBuffer();
+        
+        // Set response headers
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
+        
+        // Send buffer
+        res.send(buffer);
+        
+    } catch (error) {
+        console.error('Excel export error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Excel export failed',
+            details: error.message 
+        });
+    }
+}
+
+// Helper function to format metric names
+function formatMetricName(key) {
+    return key
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase())
+        .replace(/([A-Z])/g, ' $1')
+        .trim();
+}
+
+// PDF Export (simplified - returns HTML that can be printed as PDF)
+// PDF Export (returns HTML that can be printed as PDF)
+
+async function exportAsPDF(data, filename, res, exportsDir) {
+    try {
+        // Generate HTML report
+        const html = generatePDFHTML(data);
+        
+        // Set response headers for HTML download
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}.html"`);
+        
+        res.send(html);
+        
+    } catch (error) {
+        console.error('PDF export error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'PDF export failed',
+            details: error.message 
+        });
+    }
+}
+
+function generatePDFHTML(data) {
+    const successRate = data.summary.successRate || 0;
+    const avgDuration = data.summary.averageDuration || 0;
+    
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Website Monitoring Export - ${data.metadata.dateRange.start} to ${data.metadata.dateRange.end}</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .section { margin-bottom: 30px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+            .summary-card { background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #007bff; text-align: center; }
+            .success { color: #28a745; }
+            .warning { color: #ffc107; }
+            .danger { color: #dc3545; }
+            .footer { margin-top: 50px; text-align: center; color: #6c757d; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
+            h1 { color: #333; }
+            h2 { color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 10px; }
+            .metric-value { font-size: 28px; font-weight: bold; margin: 10px 0; }
+            .metric-label { color: #6c757d; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>📊 Website Monitoring Report</h1>
+            <p><strong>Date Range:</strong> ${data.metadata.dateRange.start} to ${data.metadata.dateRange.end}</p>
+            <p><strong>Exported:</strong> ${new Date(data.metadata.exportDate).toLocaleString()}</p>
+        </div>
+        
+        <div class="section">
+            <h2>Executive Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="metric-value">${data.summary.totalRuns}</div>
+                    <div class="metric-label">Total Test Runs</div>
+                </div>
+                <div class="summary-card">
+                    <div class="metric-value ${successRate >= 90 ? 'success' : successRate < 70 ? 'danger' : 'warning'}">
+                        ${successRate}%
+                    </div>
+                    <div class="metric-label">Overall Success Rate</div>
+                </div>
+                <div class="summary-card">
+                    <div class="metric-value">${data.summary.totalTests}</div>
+                    <div class="metric-label">Total Tests Executed</div>
+                </div>
+                <div class="summary-card">
+                    <div class="metric-value">${avgDuration}ms</div>
+                    <div class="metric-label">Average Duration</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Test Runs Overview (Last 20 Runs)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date/Time</th>
+                        <th>Tests</th>
+                        <th>Passed</th>
+                        <th>Failed</th>
+                        <th>Success Rate</th>
+                        <th>Duration</th>
+                        <th>Triggered By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.testRuns.slice(0, 20).map(run => {
+                        const runDate = new Date(run.timestamp);
+                        const successRate = run.success_rate || 0;
+                        return `
+                        <tr>
+                            <td>${run.id}</td>
+                            <td>${runDate.toLocaleDateString()} ${runDate.toLocaleTimeString()}</td>
+                            <td>${run.total_tests || 0}</td>
+                            <td class="success">${run.passed_tests || 0}</td>
+                            <td class="${run.failed_tests > 0 ? 'danger' : ''}">${run.failed_tests || 0}</td>
+                            <td class="${successRate >= 90 ? 'success' : successRate < 70 ? 'danger' : 'warning'}">
+                                ${successRate}%
+                            </td>
+                            <td>${run.duration_ms || 0}ms</td>
+                            <td>${run.triggered_by || 'scheduled'}</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+            ${data.testRuns.length > 20 ? `<p><em>... and ${data.testRuns.length - 20} more runs</em></p>` : ''}
+        </div>
+        
+        ${data.incidents && data.incidents.length > 0 ? `
+        <div class="section">
+            <h2>Incidents (${data.incidents.length})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Severity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.incidents.slice(0, 10).map(incident => `
+                        <tr>
+                            <td>${incident.id}</td>
+                            <td>${new Date(incident.created_at).toLocaleDateString()}</td>
+                            <td>${incident.title}</td>
+                            <td class="${incident.status === 'open' ? 'danger' : 'success'}">${incident.status}</td>
+                            <td class="${incident.severity === 'high' ? 'danger' : incident.severity === 'medium' ? 'warning' : ''}">
+                                ${incident.severity || 'medium'}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            ${data.incidents.length > 10 ? `<p><em>... and ${data.incidents.length - 10} more incidents</em></p>` : ''}
+        </div>
+        ` : ''}
+        
+        ${data.statistics && data.statistics.daily && data.statistics.daily.length > 0 ? `
+        <div class="section">
+            <h2>Daily Statistics (Last 7 Days)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Runs</th>
+                        <th>Total Tests</th>
+                        <th>Passed</th>
+                        <th>Failed</th>
+                        <th>Success Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.statistics.daily.slice(-7).map(day => {
+                        const successRate = day.totalTests > 0 ? ((day.passedTests / day.totalTests) * 100).toFixed(2) : 0;
+                        return `
+                        <tr>
+                            <td>${day.date}</td>
+                            <td>${day.runs}</td>
+                            <td>${day.totalTests}</td>
+                            <td class="success">${day.passedTests}</td>
+                            <td class="${day.failedTests > 0 ? 'danger' : ''}">${day.failedTests}</td>
+                            <td class="${successRate >= 90 ? 'success' : successRate < 70 ? 'danger' : 'warning'}">
+                                ${successRate}%
+                            </td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+        ` : ''}
+        
+        <div class="footer">
+            <p>Generated by Website Monitoring System • ${new Date().toLocaleDateString()}</p>
+            <p><strong>To save as PDF:</strong> Print this page (Ctrl+P) and choose "Save as PDF" as destination</p>
+        </div>
+    </body>
+    </html>`;
+}
 
 
 

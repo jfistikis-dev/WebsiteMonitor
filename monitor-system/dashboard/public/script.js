@@ -551,6 +551,8 @@ async function exportData() {
                         border: 1px solid #ddd;
                         border-radius: 4px;
                     ">
+                        <option value="excel">Excel file</option>
+                        <option value="pdf">PDF file</option>
                         <option value="csv">CSV (Excel compatible)</option>
                         <option value="json">JSON (Complete data)</option>
                     </select>
@@ -621,6 +623,7 @@ function submitExport() {
     });
     
     const url = `/api/export?${params.toString()}`;
+    
     
     // Show loading message
     const loadingMsg = document.createElement('div');
