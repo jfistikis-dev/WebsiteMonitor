@@ -140,6 +140,34 @@ app.get('/api/incidents', basicAuth, async (req, res) => {
     }
 });
 
+app.post('/api/incidents/:id/resolve', basicAuth, async (req, res) => {
+    
+    try {
+        const { id } = req.params;
+        const { resolvedBy, notes } = req.body;
+
+         if (typeof db.resolveIncident !== 'function') {
+            return res.status(501).json({ 
+                error: 'Resolve incident feature not implemented' 
+            });
+        }
+        
+        const success = await db.resolveIncident(
+            parseInt(id),
+            resolvedBy,
+            notes
+        );
+        
+        if (success) {
+            res.json({ success: true, message: 'Incident resolved' });
+        } else {
+            res.status(404).json({ error: 'Incident not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+})
+
 // Get database information
 app.get('/api/database-info', basicAuth, async (req, res) => {
     try {
